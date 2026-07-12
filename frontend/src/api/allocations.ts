@@ -97,7 +97,23 @@ export const useCreateAllocation = () => {
 }
 
 export const useReturnAllocation = () => {
-  return useMutation({
-    mutationFn: (_body: any) => Promise.resolve({})
+  const queryClient = useQueryClient()
+  return useMutation<AllocationResponse, Error, { id: number; data: AllocationReturn }>({
+    mutationFn: async ({ id, data }) => {
+      const res = await fetch(`${API_BASE}/allocations/${id}/return`, {
+        method: 'PATCH',
+        headers: getHeaders(),
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.detail || 'Failed to return allocation')
+      }
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['allocations'] })
+      queryClient.invalidateQueries({ queryKey: ['assets'] })
+    }
   })
 }

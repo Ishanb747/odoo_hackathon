@@ -64,12 +64,13 @@ app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(org_router,  prefix="/org",  tags=["org"])
 
 from routers.allocations import router as allocations_router
+from routers.maintenance import router as maintenance_router
 
 # ── Future routers — append one line per phase ────────────────
 app.include_router(assets_router, prefix="/assets", tags=["assets"])
 app.include_router(allocations_router, prefix="/allocations", tags=["allocations"])
 app.include_router(bookings_router, prefix="/bookings", tags=["bookings"])
-# Phase 5 (Ishan): app.include_router(maintenance_router, prefix="/maintenance", tags=["maintenance"])
+app.include_router(maintenance_router, prefix="/maintenance", tags=["maintenance"])
 # Phase 6 (Ishan): app.include_router(audits_router, prefix="/audits", tags=["audits"])
 # Phase 7 (both):  app.include_router(dashboard_router, prefix="/dashboard", tags=["dashboard"])
 # Phase 7 (Ishan): app.include_router(notifications_router, prefix="/notifications", tags=["notifications"])

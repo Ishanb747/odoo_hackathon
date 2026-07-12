@@ -2,7 +2,7 @@
 routers/allocations.py — Phase 3
 Asset Allocation and Transfer flows
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -61,6 +61,10 @@ class TransferRequestOut(BaseModel):
     status: str
     reason: str | None
     created_at: datetime
+
+class ReturnAllocationCreate(BaseModel):
+    condition_on_return: str | None = None
+    needs_maintenance: bool = False
 
 # ── Helpers ───────────────────────────────────────────────────
 
@@ -219,3 +223,47 @@ def request_transfer(
         reason=transfer.reason,
         created_at=transfer.created_at
     )
+
+@router.post("/{alloc_id}/return", status_code=status.HTTP_200_OK)
+def return_allocation(
+    alloc_id: int,
+    body: ReturnAllocationCreate,
+    db: Session = Depends(get_db),
+    current_user: Employee = Depends(get_current_user)
+):
+    """Return an allocated asset."""
+    from models.maintenance import MaintenanceRequest, MaintenanceStatus
+    
+    alloc = db.query(Allocation).filter(Allocation.id == alloc_id).first()
+    if not alloc:
+        raise HTTPException(status_code=404, detail="Allocation not found")
+        
+    if alloc.returned_at is not None:
+        raise HTTPException(status_code=400, detail="Allocation is already returned")
+        
+    asset = db.query(Asset).filter(Asset.id == alloc.asset_id).first()
+    if not asset:
+        raise HTTPException(status_code=404, detail="Asset not found")
+
+    # Update allocation
+    alloc.returned_at = datetime.now(timezone.utc)
+    alloc.condition_on_return = body.condition_on_return
+
+    # Update asset status
+    if body.needs_maintenance:
+        asset.status = AssetStatus.maintenance
+        
+        # Auto-create maintenance request
+        new_maintenance = MaintenanceRequest(
+            asset_id=asset.id,
+            reported_by=current_user.id,
+            issue_description=f"Auto-flagged during return. Condition reported: {body.condition_on_return}",
+            status=MaintenanceStatus.pending,
+            created_at=datetime.now(timezone.utc)
+        )
+        db.add(new_maintenance)
+    else:
+        asset.status = AssetStatus.available
+        
+    db.commit()
+    return {"status": "returned", "asset_id": asset.id}
