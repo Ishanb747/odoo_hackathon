@@ -36,8 +36,9 @@ def get_bookable_resources(db: Session = Depends(get_db)):
     # Import Asset locally or at top to avoid circular if any, but top is fine.
     # Actually we need to import Asset at the top. Let's assume we can just do it locally for safety.
     from models.asset import Asset
-    assets = db.query(Asset).filter(
-        Asset.category_name.in_(["Rooms", "Vehicles", "Projectors"])
+    from models.category import AssetCategory
+    assets = db.query(Asset).join(AssetCategory).filter(
+        AssetCategory.name.in_(["Rooms", "Vehicles", "Projectors"])
     ).all()
     
     names = [a.name for a in assets]
