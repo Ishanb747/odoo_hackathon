@@ -5,11 +5,11 @@ import AppShell from './components/AppShell'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
 import OrgSetupPage from './pages/OrgSetupPage'
+import BookingsPage from './pages/BookingsPage'
 import {
   DashboardPage,
   AssetsPage,
   AllocationPage,
-  BookingPage,
   MaintenancePage,
   AuditPage,
   ReportsPage,
@@ -54,7 +54,7 @@ const AppRoutes: React.FC = () => (
         <Route path="org"           element={<OrgSetupPage />} />
         <Route path="assets"        element={<AssetsPage />} />
         <Route path="allocation"    element={<AllocationPage />} />
-        <Route path="booking"       element={<BookingPage />} />
+        <Route path="booking"       element={<BookingsPage />} />
         <Route path="maintenance"   element={<MaintenancePage />} />
         <Route path="audit"         element={<AuditPage />} />
         <Route path="reports"       element={<ReportsPage />} />
