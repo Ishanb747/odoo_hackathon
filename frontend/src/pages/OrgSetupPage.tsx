@@ -22,6 +22,7 @@ import {
   getEmployees,
   updateEmployeeRole,
   updateEmployeeDepartment,
+  deleteEmployee,
   type DepartmentOut,
   type DepartmentCreate,
   type CategoryOut,
@@ -370,6 +371,7 @@ const CategoriesTab: React.FC<{ triggerAdd: boolean; onAddHandled: () => void }>
 const EmployeesTab: React.FC = () => {
   const qc = useQueryClient()
   const { user } = useAuth()
+  const [deleteTarget, setDeleteTarget] = useState<number | null>(null)
 
   const { data: employees = [], isLoading } = useQuery({ queryKey: ['employees'], queryFn: getEmployees })
   const { data: depts = [] } = useQuery({ queryKey: ['departments'], queryFn: getDepartments })
@@ -386,6 +388,12 @@ const EmployeesTab: React.FC = () => {
     onError: (e: Error) => alert(e.message),
   })
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => deleteEmployee(id),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['employees'] }); setDeleteTarget(null) },
+    onError: (e: Error) => alert(e.message),
+  })
+
   if (isLoading) return <p style={{ color: 'var(--color-neutral)' }}>Loading…</p>
 
   return (
@@ -397,11 +405,12 @@ const EmployeesTab: React.FC = () => {
             <th style={thStyle}>Email</th>
             <th style={thStyle}>Department</th>
             <th style={thStyle}>Role</th>
+            {user?.role === 'superadmin' && <th style={{ ...thStyle, width: 60 }}></th>}
           </tr>
         </thead>
         <tbody>
           {employees.length === 0 && (
-            <tr><td colSpan={4} style={{ ...tdStyle, textAlign: 'center', color: 'var(--color-neutral)', padding: 'var(--space-8)' }}>No employees found.</td></tr>
+            <tr><td colSpan={user?.role === 'superadmin' ? 5 : 4} style={{ ...tdStyle, textAlign: 'center', color: 'var(--color-neutral)', padding: 'var(--space-8)' }}>No employees found.</td></tr>
           )}
           {employees.map((emp, i) => (
             <tr key={emp.id} style={{ backgroundColor: i % 2 === 1 ? 'var(--color-surface-muted)' : 'var(--color-surface)' }}>
@@ -431,10 +440,34 @@ const EmployeesTab: React.FC = () => {
                   {user?.role === 'superadmin' && <option value="superadmin">Superadmin</option>}
                 </select>
               </td>
+              {user?.role === 'superadmin' && (
+                <td style={tdStyle}>
+                  {emp.id !== user.id && (
+                    <button id={`delete-emp-${emp.id}`} style={{ ...iconBtn, color: 'var(--color-danger)' }} onClick={() => setDeleteTarget(emp.id)} title="Delete Employee"
+                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-danger-light)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'none')}>🗑️</button>
+                  )}
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
       </table>
+
+      {deleteTarget && (
+        <Modal title="Delete Employee" onClose={() => setDeleteTarget(null)} width={400}
+          footer={<>
+            <Button variant="ghost" size="md" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+            <Button id="confirm-delete-emp-btn" variant="primary" size="md" style={{ backgroundColor: 'var(--color-danger)', borderColor: 'var(--color-danger)' }} disabled={deleteMutation.isPending} onClick={() => deleteMutation.mutate(deleteTarget)}>
+              {deleteMutation.isPending ? 'Deleting…' : 'Delete'}
+            </Button>
+          </>}
+        >
+          <p style={{ color: 'var(--color-ink)', fontSize: 'var(--text-base)' }}>
+            Are you sure you want to delete this employee? This action cannot be undone and will permanently remove their access.
+          </p>
+        </Modal>
+      )}
     </div>
   )
 }

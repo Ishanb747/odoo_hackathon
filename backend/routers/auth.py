@@ -113,6 +113,15 @@ def require_admin(current_user: Annotated[Employee, Depends(get_current_user)]) 
     return current_user
 
 
+def require_superadmin(current_user: Annotated[Employee, Depends(get_current_user)]) -> Employee:
+    if current_user.role != EmployeeRole.superadmin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Superadmin privileges required"
+        )
+    return current_user
+
+
 # ── Endpoints ─────────────────────────────────────────────────
 
 @router.post("/signup", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)

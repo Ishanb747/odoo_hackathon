@@ -124,3 +124,6 @@ export const updateEmployeeDepartment = (
     method: 'PATCH',
     body: JSON.stringify({ department_id }),
   })
+
+export const deleteEmployee = (id: number): Promise<void> =>
+  authFetch(`/org/employees/${id}`, { method: 'DELETE' })

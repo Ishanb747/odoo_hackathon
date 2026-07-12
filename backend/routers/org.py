@@ -17,7 +17,7 @@ from models import (
     Employee,
     EmployeeRole,
 )
-from routers.auth import get_current_user, require_admin
+from routers.auth import get_current_user, require_admin, require_superadmin
 
 router = APIRouter()
 
@@ -332,3 +332,17 @@ def update_employee_department(
     db.commit()
     db.refresh(emp)
     return _emp_to_out(emp, db)
+
+
+@router.delete("/employees/{emp_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_employee(
+    emp_id: int,
+    db: Session = Depends(get_db),
+    superadmin: Employee = Depends(require_superadmin),
+):
+    """Delete an employee. Superadmin only."""
+    if emp_id == superadmin.id:
+        raise HTTPException(status_code=400, detail="Cannot delete your own account")
+    emp = _emp_or_404(emp_id, db)
+    db.delete(emp)
+    db.commit()
