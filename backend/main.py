@@ -1,13 +1,15 @@
 """
 main.py — FastAPI application entry point
-Phase 0: health check + CORS only.
 Routers added per-phase (append-only lines).
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
+from config import settings
 from database import SessionLocal
+from routers.auth import router as auth_router
+from routers.org import router as org_router
 
 app = FastAPI(
     title="AssetFlow API",
@@ -15,13 +17,19 @@ app = FastAPI(
     version="0.1.0",
 )
 
-# ── CORS — allow Vite dev server ──────────────────────────────
+def _local_dev_origins() -> list[str]:
+    ports = {settings.FRONTEND_PORT, 3000, 5173}
+    origins: list[str] = []
+    for port in sorted(ports):
+        origins.append(f"http://localhost:{port}")
+        origins.append(f"http://127.0.0.1:{port}")
+    return origins
+
+
+# ── CORS — local frontend origins used during dev ────────────────
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=_local_dev_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -49,9 +57,11 @@ def health_check():
         db.close()
 
 
+# ── Phase 1 (Dev) ─────────────────────────────────────────────
+app.include_router(auth_router, prefix="/auth", tags=["auth"])
+app.include_router(org_router,  prefix="/org",  tags=["org"])
+
 # ── Future routers — append one line per phase ────────────────
-# Phase 1 (Dev):   app.include_router(auth_router, prefix="/auth", tags=["auth"])
-# Phase 1 (Dev):   app.include_router(org_router,  prefix="/org",  tags=["org"])
 # Phase 2 (Dev):   app.include_router(assets_router, prefix="/assets", tags=["assets"])
 # Phase 3 (Dev):   app.include_router(allocations_router, prefix="/allocations", tags=["allocations"])
 # Phase 4 (Ishan): app.include_router(bookings_router, prefix="/bookings", tags=["bookings"])

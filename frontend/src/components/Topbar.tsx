@@ -1,10 +1,23 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 interface TopbarProps {
   title?: string
 }
 
 const Topbar: React.FC<TopbarProps> = ({ title = '' }) => {
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login', { replace: true })
+  }
+
+  const initials = user?.name
+    ? user.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+    : 'U'
   return (
     <header
       style={{
@@ -52,11 +65,16 @@ const Topbar: React.FC<TopbarProps> = ({ title = '' }) => {
         )}
       </div>
 
-      {/* Right: user avatar placeholder */}
+      {/* Right: user info + logout */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-        {/* Avatar circle — will wire to auth context in Phase 1 */}
+        {user && (
+          <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-neutral-dark)', fontFamily: 'var(--font-body)' }}>
+            {user.name}
+          </span>
+        )}
         <div
-          title="Signed in user"
+          id="topbar-avatar"
+          title={user?.email ?? 'Signed in user'}
           style={{
             width: 36,
             height: 36,
@@ -65,18 +83,35 @@ const Topbar: React.FC<TopbarProps> = ({ title = '' }) => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            cursor: 'pointer',
-            transition: 'opacity var(--transition-fast)',
+            flexShrink: 0,
             color: 'white',
             fontFamily: 'var(--font-display)',
             fontWeight: 600,
             fontSize: 'var(--text-sm)',
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
-          onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
         >
-          A
+          {initials}
         </div>
+        <button
+          id="topbar-logout-btn"
+          onClick={handleLogout}
+          title="Log out"
+          style={{
+            background: 'none',
+            border: '1px solid var(--color-border)',
+            borderRadius: 'var(--radius-md)',
+            cursor: 'pointer',
+            padding: 'var(--space-1) var(--space-3)',
+            fontFamily: 'var(--font-body)',
+            fontSize: 'var(--text-sm)',
+            color: 'var(--color-neutral-dark)',
+            transition: 'all var(--transition-fast)',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--color-danger-light)'; e.currentTarget.style.color = 'var(--color-danger-dark)'; e.currentTarget.style.borderColor = 'var(--color-danger)' }}
+          onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--color-neutral-dark)'; e.currentTarget.style.borderColor = 'var(--color-border)' }}
+        >
+          Log out
+        </button>
       </div>
     </header>
   )

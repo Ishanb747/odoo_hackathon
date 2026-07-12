@@ -134,7 +134,7 @@ const Sidebar: React.FC = () => {
           fontFamily: 'var(--font-body)',
         }}
       >
-        Phase 0 — Foundation
+        Phase 1 — Identity & Org Setup
       </div>
     </aside>
   )
