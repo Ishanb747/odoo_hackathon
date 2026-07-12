@@ -16,10 +16,23 @@ const DashboardPage: React.FC = () => {
     queryKey: ['dashboardData'],
     queryFn: getDashboardData,
     refetchInterval: 30000,
+    staleTime: 60000,
+    gcTime: 5 * 60000,
   })
 
   if (isLoading) {
-    return <div style={{ padding: 'var(--space-6)' }}>Loading dashboard...</div>
+    return (
+      <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 'var(--space-6)', padding: 'var(--space-6)' }}>
+        <div className="skeleton skeleton-title"></div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--space-4)' }}>
+          {Array.from({ length: 6 }).map((_, i) => <div key={i} className="skeleton skeleton-card"></div>)}
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 'var(--space-6)' }}>
+          <div className="skeleton" style={{ height: '350px' }}></div>
+          <div className="skeleton" style={{ height: '350px' }}></div>
+        </div>
+      </div>
+    )
   }
 
   if (isError || !data) {
@@ -38,7 +51,7 @@ const DashboardPage: React.FC = () => {
       {/* ── Hero ────────────────────────────────────────────────────── */}
       <header className="page-header">
         <div>
-          <h1 className="page-title">Welcome back!</h1>
+          <h1 className="page-title text-gradient">Welcome back!</h1>
           <p style={{ color: 'var(--color-muted)', marginTop: 'var(--space-1)', fontSize: 'var(--text-sm)' }}>
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </p>
@@ -65,7 +78,7 @@ const DashboardPage: React.FC = () => {
           { label: 'Pending Transfers', value: kpis.pending_transfers, color: 'var(--color-warning)', sub: 'awaiting approval' },
           { label: 'Returns Due', value: kpis.upcoming_returns, color: 'var(--color-muted)', sub: 'active allocations' },
         ].map((kpi, idx) => (
-          <Card key={idx} style={{ borderLeft: `4px solid ${kpi.color}`, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <Card key={idx} className="hover-lift glass-panel" style={{ borderLeft: `4px solid ${kpi.color}`, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 'var(--space-2)' }}>{kpi.label}</div>
             <div style={{ fontSize: '1.875rem', fontWeight: 700, fontFamily: 'var(--font-display)', color: 'var(--color-ink)', lineHeight: 1 }}>
               {kpi.value}
@@ -83,7 +96,7 @@ const DashboardPage: React.FC = () => {
           
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
             {/* Status Donut Chart */}
-            <Card style={{ display: 'flex', flexDirection: 'column' }}>
+            <Card className="glass-panel" style={{ display: 'flex', flexDirection: 'column' }}>
               <h3 className="section-title" style={{ marginBottom: 'var(--space-4)' }}>
                 Asset Distribution
               </h3>
@@ -116,7 +129,7 @@ const DashboardPage: React.FC = () => {
             </Card>
 
             {/* Department Utilization Bar Chart */}
-            <Card style={{ display: 'flex', flexDirection: 'column' }}>
+            <Card className="glass-panel" style={{ display: 'flex', flexDirection: 'column' }}>
               <h3 className="section-title" style={{ marginBottom: 'var(--space-4)' }}>
                 Department Utilization
               </h3>
@@ -159,7 +172,7 @@ const DashboardPage: React.FC = () => {
             </div>
           )}
 
-          <Card style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+          <Card className="glass-panel" style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
             <h3 className="section-title" style={{ marginBottom: 'var(--space-5)' }}>Recent Activity</h3>
             {recent_activity.length === 0 ? (
               <div style={{ color: 'var(--color-neutral)', fontSize: '0.875rem' }}>No recent activity to display.</div>
