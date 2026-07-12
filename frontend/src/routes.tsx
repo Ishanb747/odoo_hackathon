@@ -9,12 +9,12 @@ import BookingsPage from './pages/BookingsPage'
 import MaintenancePage from './pages/MaintenancePage'
 import AuditPage from './pages/AuditPage'
 import {
-  DashboardPage,
   ReportsPage,
   NotificationsPage,
 } from './pages/PlaceholderPage'
 import AssetsPage from './pages/AssetsPage'
 import AllocationPage from './pages/AllocationPage'
+import DashboardPage from './pages/DashboardPage'
 
 /**
  * ProtectedRoute — redirects to /login if the user is not authenticated.
