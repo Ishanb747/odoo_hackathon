@@ -20,7 +20,7 @@ const Sidebar: React.FC = () => {
       style={{
         width: 'var(--sidebar-width)',
         minHeight: '100vh',
-        backgroundColor: 'var(--color-ink)',
+        backgroundColor: '#1a1825',
         display: 'flex',
         flexDirection: 'column',
         position: 'fixed',
@@ -29,13 +29,14 @@ const Sidebar: React.FC = () => {
         zIndex: 100,
         overflowY: 'auto',
         overflowX: 'hidden',
+        borderRight: '1px solid rgba(255,255,255,0.05)',
       }}
     >
       {/* ── Wordmark ── */}
       <div
         style={{
-          padding: 'var(--space-6) var(--space-5)',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          padding: 'var(--space-5) var(--space-5)',
+          borderBottom: '1px solid rgba(255,255,255,0.07)',
           display: 'flex',
           alignItems: 'center',
           gap: 'var(--space-3)',
@@ -43,23 +44,24 @@ const Sidebar: React.FC = () => {
       >
         <div
           style={{
-            width: 36,
-            height: 36,
+            width: 32,
+            height: 32,
             borderRadius: 'var(--radius-md)',
-            backgroundColor: 'var(--color-primary)',
+            background: 'linear-gradient(135deg, var(--color-primary), #a89cff)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
+            boxShadow: '0 2px 8px rgba(108,99,255,0.4)',
           }}
         >
           <span
             style={{
               fontFamily: 'var(--font-display)',
               fontWeight: 700,
-              fontSize: 'var(--text-sm)',
+              fontSize: '0.75rem',
               color: 'white',
-              letterSpacing: '-0.02em',
+              letterSpacing: '-0.01em',
             }}
           >
             AF
@@ -69,9 +71,9 @@ const Sidebar: React.FC = () => {
           style={{
             fontFamily: 'var(--font-display)',
             fontWeight: 600,
-            fontSize: 'var(--text-xl)',
+            fontSize: 'var(--text-lg)',
             color: 'white',
-            letterSpacing: '-0.01em',
+            letterSpacing: '-0.02em',
           }}
         >
           AssetFlow
@@ -79,8 +81,8 @@ const Sidebar: React.FC = () => {
       </div>
 
       {/* ── Nav items ── */}
-      <nav style={{ flex: 1, padding: 'var(--space-4) var(--space-3)' }}>
-        <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--space-1)' }}>
+      <nav style={{ flex: 1, padding: 'var(--space-3) var(--space-2)' }}>
+        <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1px' }}>
           {NAV_ITEMS.map(({ label, path, icon: Icon }) => (
             <li key={path}>
               <NavLink
@@ -89,34 +91,33 @@ const Sidebar: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 'var(--space-3)',
-                  padding: 'var(--space-3) var(--space-4)',
+                  padding: 'var(--space-2) var(--space-3)',
                   borderRadius: 'var(--radius-md)',
                   textDecoration: 'none',
                   fontFamily: 'var(--font-body)',
                   fontSize: 'var(--text-sm)',
-                  fontWeight: isActive ? 600 : 500,
-                  color: isActive ? 'white' : 'rgba(255,255,255,0.6)',
-                  backgroundColor: isActive ? 'var(--color-primary)' : 'transparent',
+                  fontWeight: isActive ? 600 : 400,
+                  color: isActive ? 'white' : 'rgba(255,255,255,0.5)',
+                  backgroundColor: isActive ? 'rgba(108,99,255,0.85)' : 'transparent',
                   transition: 'all var(--transition-fast)',
                   position: 'relative',
                 })}
                 onMouseEnter={(e) => {
                   const el = e.currentTarget
-                  if (!el.classList.contains('active') && el.style.backgroundColor !== 'var(--color-primary)') {
-                    el.style.backgroundColor = 'rgba(108,99,255,0.15)'
-                    el.style.color = 'rgba(255,255,255,0.9)'
+                  if (el.getAttribute('aria-current') !== 'page') {
+                    el.style.backgroundColor = 'rgba(255,255,255,0.06)'
+                    el.style.color = 'rgba(255,255,255,0.85)'
                   }
                 }}
                 onMouseLeave={(e) => {
                   const el = e.currentTarget
-                  // NavLink handles active state; reset non-active items
                   if (el.getAttribute('aria-current') !== 'page') {
                     el.style.backgroundColor = 'transparent'
-                    el.style.color = 'rgba(255,255,255,0.6)'
+                    el.style.color = 'rgba(255,255,255,0.5)'
                   }
                 }}
               >
-                <Icon size={18} />
+                <Icon size={16} />
                 <span style={{ flex: 1 }}>{label}</span>
               </NavLink>
             </li>
@@ -128,13 +129,14 @@ const Sidebar: React.FC = () => {
       <div
         style={{
           padding: 'var(--space-4) var(--space-5)',
-          borderTop: '1px solid rgba(255,255,255,0.08)',
+          borderTop: '1px solid rgba(255,255,255,0.07)',
           fontSize: 'var(--text-xs)',
-          color: 'rgba(255,255,255,0.3)',
-          fontFamily: 'var(--font-body)',
+          color: 'rgba(255,255,255,0.2)',
+          fontFamily: 'var(--font-mono)',
+          letterSpacing: '0.04em',
         }}
       >
-        Phase 1 — Identity & Org Setup
+        AssetFlow v0.1
       </div>
     </aside>
   )

@@ -50,7 +50,7 @@ const AppShell: React.FC = () => {
         <main
           style={{
             flex: 1,
-            padding: 'var(--space-8)',
+            padding: 'var(--space-6) var(--space-8)',
             overflowY: 'auto',
           }}
         >

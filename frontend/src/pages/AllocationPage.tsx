@@ -13,6 +13,7 @@ import {
 
 import Card from '../components/Card'
 import Button from '../components/Button'
+import Badge from '../components/Badge'
 
 const AllocationPage: React.FC = () => {
   const queryClient = useQueryClient()
@@ -83,30 +84,24 @@ const AllocationPage: React.FC = () => {
     })
   }
 
-  // ── Render Helpers ───────────────────────────────────────────
+  // ── Render ───────────────────────────────────────────────────
 
   const selectedAsset = assets.find(a => a.id === selectedAssetId)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
-      <header>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--color-ink)' }}>Allocation & Transfer</h1>
-      </header>
+    <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+      {/* Page Header */}
+      <div className="page-header">
+        <h1 className="page-title">Allocation &amp; Transfer</h1>
+      </div>
 
+      {/* Asset Picker */}
       <Card>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-          <label style={{ fontWeight: 500 }}>Select Asset</label>
+        <div className="form-field" style={{ maxWidth: 480 }}>
+          <label className="form-label">Select Asset</label>
           <select
             value={selectedAssetId}
             onChange={(e) => setSelectedAssetId(e.target.value ? Number(e.target.value) : '')}
-            style={{
-              padding: 'var(--space-2)',
-              borderRadius: 'var(--radius-base)',
-              border: '1px solid var(--color-border)',
-              backgroundColor: 'var(--color-surface)',
-              width: '100%',
-              maxWidth: '400px'
-            }}
           >
             <option value="">-- Choose an asset --</option>
             {assets.map((a: AssetOut) => (
@@ -121,62 +116,50 @@ const AllocationPage: React.FC = () => {
       {selectedAssetId !== '' && (
         <>
           {stateLoading ? (
-            <div>Loading allocation state...</div>
+            <div style={{ color: 'var(--color-muted)', fontSize: 'var(--text-sm)' }}>Loading allocation state…</div>
           ) : allocationState?.is_allocated ? (
-            // ── Conflict Block & Transfer Form ──────────────────────
+            /* ── Conflict Block & Transfer Form ────────────────────── */
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
               <div
                 style={{
-                  backgroundColor: '#FFF0F0', // Light coral tint
+                  backgroundColor: 'var(--color-danger-light)',
                   border: '1px solid var(--color-danger)',
-                  padding: 'var(--space-4)',
+                  padding: 'var(--space-5)',
                   borderRadius: 'var(--radius-card)',
                   color: 'var(--color-ink)'
                 }}
               >
-                <h3 style={{ color: 'var(--color-danger)', margin: '0 0 var(--space-2) 0', fontWeight: 600 }}>
-                  Already Allocated
-                </h3>
-                <p style={{ margin: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 'var(--space-2)' }}>
+                  <Badge tone="danger" dot>Conflict</Badge>
+                  <span style={{ fontWeight: 600, color: 'var(--color-danger-dark)' }}>Already Allocated</span>
+                </div>
+                <p style={{ margin: 0, fontSize: 'var(--text-sm)', lineHeight: 1.5 }}>
                   Allocated to <strong>{allocationState.current_allocation?.allocated_to}</strong>{' '}
-                  ({allocationState.current_allocation?.department || 'Unknown'})
-                  <br />
-                  Direct re-allocation is blocked – submit a transfer request below.
+                  ({allocationState.current_allocation?.department || 'Unknown'}).
+                  Direct re-allocation is blocked — submit a transfer request below.
                 </p>
               </div>
 
               <Card>
                 <form onSubmit={handleTransfer} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-                  <h3 style={{ margin: 0, fontWeight: 600 }}>Transfer Request</h3>
-                  
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-                    <label style={{ fontSize: '0.875rem', fontWeight: 500 }}>From</label>
+                  <h3 className="section-title">Transfer Request</h3>
+
+                  <div className="form-field">
+                    <label className="form-label">From</label>
                     <input
                       type="text"
                       disabled
                       value={`${allocationState.current_allocation?.allocated_to} (${allocationState.current_allocation?.department || 'Unknown'})`}
-                      style={{
-                        padding: 'var(--space-2)',
-                        borderRadius: 'var(--radius-base)',
-                        border: '1px solid var(--color-border)',
-                        backgroundColor: '#f5f5f5',
-                        color: '#666'
-                      }}
+                      style={{ backgroundColor: 'var(--color-surface-raised)', color: 'var(--color-muted)' }}
                     />
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-                    <label style={{ fontSize: '0.875rem', fontWeight: 500 }}>To (Employee)</label>
+                  <div className="form-field">
+                    <label className="form-label">To (Employee)</label>
                     <select
                       required
                       value={toEmployeeId}
                       onChange={(e) => setToEmployeeId(e.target.value ? Number(e.target.value) : '')}
-                      style={{
-                        padding: 'var(--space-2)',
-                        borderRadius: 'var(--radius-base)',
-                        border: '1px solid var(--color-border)',
-                        backgroundColor: 'var(--color-surface)'
-                      }}
                     >
                       <option value="">-- Choose employee --</option>
                       {employees.map((emp: EmployeeOut) => (
@@ -185,51 +168,39 @@ const AllocationPage: React.FC = () => {
                     </select>
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-                    <label style={{ fontSize: '0.875rem', fontWeight: 500 }}>Reason</label>
+                  <div className="form-field">
+                    <label className="form-label">Reason</label>
                     <textarea
                       value={reason}
                       onChange={(e) => setReason(e.target.value)}
                       rows={3}
-                      style={{
-                        padding: 'var(--space-2)',
-                        borderRadius: 'var(--radius-base)',
-                        border: '1px solid var(--color-border)',
-                        backgroundColor: 'var(--color-surface)',
-                        resize: 'vertical'
-                      }}
+                      placeholder="Why is this transfer needed?"
                     />
                   </div>
 
                   <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <Button type="submit" variant="primary" disabled={transferMutation.isPending}>
-                      {transferMutation.isPending ? 'Submitting...' : 'Submit Request'}
+                    <Button type="submit" variant="primary" size="sm" disabled={transferMutation.isPending}>
+                      {transferMutation.isPending ? 'Submitting…' : 'Submit Request'}
                     </Button>
                   </div>
                 </form>
               </Card>
             </div>
           ) : (
-            // ── Standard Allocation Form ────────────────────────────
+            /* ── Standard Allocation Form ──────────────────────────── */
             <Card>
               <form onSubmit={handleAllocate} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-                <h3 style={{ margin: 0, fontWeight: 600 }}>Allocate Asset</h3>
-                <p style={{ margin: 0, fontSize: '0.875rem', color: '#666' }}>
-                  {selectedAsset?.tag} is currently available.
+                <h3 className="section-title">Allocate Asset</h3>
+                <p style={{ margin: 0, fontSize: 'var(--text-sm)', color: 'var(--color-muted)' }}>
+                  <span className="asset-tag">{selectedAsset?.tag}</span> is currently available.
                 </p>
-                
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-                  <label style={{ fontSize: '0.875rem', fontWeight: 500 }}>To Employee</label>
+
+                <div className="form-field">
+                  <label className="form-label">To Employee</label>
                   <select
                     required
                     value={toEmployeeId}
                     onChange={(e) => setToEmployeeId(e.target.value ? Number(e.target.value) : '')}
-                    style={{
-                      padding: 'var(--space-2)',
-                      borderRadius: 'var(--radius-base)',
-                      border: '1px solid var(--color-border)',
-                      backgroundColor: 'var(--color-surface)'
-                    }}
                   >
                     <option value="">-- Choose employee --</option>
                     {employees.map((emp: EmployeeOut) => (
@@ -238,25 +209,19 @@ const AllocationPage: React.FC = () => {
                   </select>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-                  <label style={{ fontSize: '0.875rem', fontWeight: 500 }}>Notes</label>
+                <div className="form-field">
+                  <label className="form-label">Notes</label>
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     rows={2}
-                    style={{
-                      padding: 'var(--space-2)',
-                      borderRadius: 'var(--radius-base)',
-                      border: '1px solid var(--color-border)',
-                      backgroundColor: 'var(--color-surface)',
-                      resize: 'vertical'
-                    }}
+                    placeholder="Optional allocation notes"
                   />
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                  <Button type="submit" variant="primary" disabled={allocateMutation.isPending}>
-                    {allocateMutation.isPending ? 'Allocating...' : 'Allocate'}
+                  <Button type="submit" variant="primary" size="sm" disabled={allocateMutation.isPending}>
+                    {allocateMutation.isPending ? 'Allocating…' : 'Allocate'}
                   </Button>
                 </div>
               </form>
@@ -265,29 +230,38 @@ const AllocationPage: React.FC = () => {
 
           {/* ── Allocation History ─────────────────────────────── */}
           {allocationState && allocationState.history.length > 0 && (
-            <div style={{ marginTop: 'var(--space-4)' }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-ink)' }}>Allocation history</h3>
-              <ul style={{ listStyleType: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+            <Card>
+              <h3 className="section-title" style={{ marginBottom: 'var(--space-4)' }}>Allocation History</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
                 {allocationState.history.map((hist) => {
                   const allocDate = new Date(hist.allocated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                  
-                  if (hist.returned_at) {
-                    const retDate = new Date(hist.returned_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                    return (
-                      <li key={hist.id} style={{ fontSize: '0.875rem', color: '#555' }}>
-                        {retDate} – Returned by {hist.allocated_to} – condition: {hist.condition_on_return || 'unknown'}
-                      </li>
-                    )
-                  } else {
-                    return (
-                      <li key={hist.id} style={{ fontSize: '0.875rem', color: '#555' }}>
-                        {allocDate} – Allocated to {hist.allocated_to} – {hist.department || 'Unknown'}
-                      </li>
-                    )
-                  }
+
+                  return (
+                    <div key={hist.id} style={{ display: 'flex', gap: 'var(--space-3)', fontSize: 'var(--text-sm)', alignItems: 'flex-start' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+                        <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: hist.returned_at ? 'var(--color-muted)' : 'var(--color-primary)', marginTop: 6 }} />
+                        <div style={{ width: 1, height: 20, backgroundColor: 'var(--color-border)' }} />
+                      </div>
+                      <div style={{ color: 'var(--color-ink-soft)' }}>
+                        {hist.returned_at ? (
+                          <>
+                            <span style={{ color: 'var(--color-muted)', fontSize: 'var(--text-xs)' }}>
+                              {new Date(hist.returned_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </span>{' '}
+                            Returned by {hist.allocated_to} — condition: {hist.condition_on_return || 'unknown'}
+                          </>
+                        ) : (
+                          <>
+                            <span style={{ color: 'var(--color-muted)', fontSize: 'var(--text-xs)' }}>{allocDate}</span>{' '}
+                            Allocated to <strong>{hist.allocated_to}</strong> — {hist.department || 'Unknown'}
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  )
                 })}
-              </ul>
-            </div>
+              </div>
+            </Card>
           )}
         </>
       )}

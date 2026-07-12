@@ -27,36 +27,35 @@ const Topbar: React.FC<TopbarProps> = ({ title = '' }) => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 var(--space-8)',
+        padding: '0 var(--space-6)',
         position: 'sticky',
         top: 0,
         zIndex: 50,
-        boxShadow: 'var(--shadow-sm)',
+        boxShadow: 'var(--shadow-xs)',
       }}
     >
       {/* Left: AssetFlow wordmark + page title */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
         <span
           style={{
             fontFamily: 'var(--font-display)',
             fontWeight: 700,
-            fontSize: 'var(--text-xl)',
+            fontSize: 'var(--text-lg)',
             color: 'var(--color-primary)',
-            letterSpacing: '-0.01em',
+            letterSpacing: '-0.02em',
           }}
         >
           AssetFlow
         </span>
         {title && (
           <>
-            <span style={{ color: 'var(--color-border)', fontSize: 'var(--text-lg)' }}>/</span>
+            <span style={{ color: 'var(--color-border-strong)', fontSize: 'var(--text-base)', userSelect: 'none' }}>›</span>
             <span
               style={{
                 fontFamily: 'var(--font-body)',
-                fontWeight: 600,
-                fontSize: 'var(--text-base)',
-                color: 'var(--color-ink)',
-                opacity: 0.7,
+                fontWeight: 500,
+                fontSize: 'var(--text-sm)',
+                color: 'var(--color-muted)',
               }}
             >
               {title}
@@ -68,7 +67,7 @@ const Topbar: React.FC<TopbarProps> = ({ title = '' }) => {
       {/* Right: user info + logout */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
         {user && (
-          <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-neutral-dark)', fontFamily: 'var(--font-body)' }}>
+          <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-muted)', fontFamily: 'var(--font-body)', fontWeight: 500 }}>
             {user.name}
           </span>
         )}
@@ -76,10 +75,10 @@ const Topbar: React.FC<TopbarProps> = ({ title = '' }) => {
           id="topbar-avatar"
           title={user?.email ?? 'Signed in user'}
           style={{
-            width: 36,
-            height: 36,
+            width: 32,
+            height: 32,
             borderRadius: 'var(--radius-full)',
-            backgroundColor: 'var(--color-primary)',
+            background: 'linear-gradient(135deg, var(--color-primary), #a89cff)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -87,7 +86,8 @@ const Topbar: React.FC<TopbarProps> = ({ title = '' }) => {
             color: 'white',
             fontFamily: 'var(--font-display)',
             fontWeight: 600,
-            fontSize: 'var(--text-sm)',
+            fontSize: '0.7rem',
+            letterSpacing: '0.02em',
           }}
         >
           {initials}

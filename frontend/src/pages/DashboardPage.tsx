@@ -34,18 +34,18 @@ const DashboardPage: React.FC = () => {
   const hasOverdue = overdue_alerts.length > 0
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+    <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
       {/* ── Hero ────────────────────────────────────────────────────── */}
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <header className="page-header">
         <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 600, color: 'var(--color-ink)' }}>Welcome back!</h1>
-          <p style={{ color: 'var(--color-neutral)', marginTop: 'var(--space-1)' }}>
-            Here is your overview for {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}.
+          <h1 className="page-title">Welcome back!</h1>
+          <p style={{ color: 'var(--color-muted)', marginTop: 'var(--space-1)', fontSize: 'var(--text-sm)' }}>
+            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 'var(--space-4)' }}>
-          <Button variant="primary" onClick={() => navigate('/app/assets')}>+ Register Asset</Button>
-          <Button variant="secondary" onClick={() => navigate('/app/booking')}>Book Resource</Button>
+        <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
+          <Button variant="primary" size="sm" onClick={() => navigate('/app/assets')}>+ Register Asset</Button>
+          <Button variant="secondary" size="sm" onClick={() => navigate('/app/booking')}>Book Resource</Button>
         </div>
       </header>
 
@@ -58,18 +58,19 @@ const DashboardPage: React.FC = () => {
         }}
       >
         {[
-          { label: 'Available', value: kpis.available_assets, color: 'var(--color-success)' },
-          { label: 'Allocated', value: kpis.allocated_assets, color: 'var(--color-primary)' },
-          { label: 'Maintenance', value: kpis.maintenance_assets, color: 'var(--color-warning)' },
-          { label: 'Active Bookings', value: kpis.active_bookings, color: 'var(--color-primary)' },
-          { label: 'Transfers', value: kpis.pending_transfers, color: 'var(--color-primary)' },
-          { label: 'Returns Due', value: kpis.upcoming_returns, color: 'var(--color-ink)' },
+          { label: 'Available', value: kpis.available_assets, color: 'var(--color-success)', sub: 'assets ready' },
+          { label: 'Allocated', value: kpis.allocated_assets, color: 'var(--color-primary)', sub: 'currently in use' },
+          { label: 'Maintenance', value: kpis.maintenance_assets, color: 'var(--color-warning)', sub: 'under service' },
+          { label: 'Active Bookings', value: kpis.active_bookings, color: 'var(--color-primary)', sub: 'confirmed today' },
+          { label: 'Pending Transfers', value: kpis.pending_transfers, color: 'var(--color-warning)', sub: 'awaiting approval' },
+          { label: 'Returns Due', value: kpis.upcoming_returns, color: 'var(--color-muted)', sub: 'active allocations' },
         ].map((kpi, idx) => (
           <Card key={idx} style={{ borderLeft: `4px solid ${kpi.color}`, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div style={{ fontSize: '0.875rem', color: 'var(--color-neutral)', fontWeight: 500 }}>{kpi.label}</div>
-            <div style={{ fontSize: '2rem', fontWeight: 700, fontFamily: 'var(--font-display)', color: 'var(--color-ink)', marginTop: 'var(--space-2)' }}>
+            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 'var(--space-2)' }}>{kpi.label}</div>
+            <div style={{ fontSize: '1.875rem', fontWeight: 700, fontFamily: 'var(--font-display)', color: 'var(--color-ink)', lineHeight: 1 }}>
               {kpi.value}
             </div>
+            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-muted)', marginTop: 'var(--space-1)' }}>{kpi.sub}</div>
           </Card>
         ))}
       </div>
@@ -83,7 +84,7 @@ const DashboardPage: React.FC = () => {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
             {/* Status Donut Chart */}
             <Card style={{ display: 'flex', flexDirection: 'column' }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-ink)', marginBottom: 'var(--space-4)' }}>
+              <h3 className="section-title" style={{ marginBottom: 'var(--space-4)' }}>
                 Asset Distribution
               </h3>
               <div style={{ height: 250, flexGrow: 1 }}>
@@ -116,7 +117,7 @@ const DashboardPage: React.FC = () => {
 
             {/* Department Utilization Bar Chart */}
             <Card style={{ display: 'flex', flexDirection: 'column' }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-ink)', marginBottom: 'var(--space-4)' }}>
+              <h3 className="section-title" style={{ marginBottom: 'var(--space-4)' }}>
                 Department Utilization
               </h3>
               <div style={{ height: 250, flexGrow: 1 }}>
@@ -159,9 +160,7 @@ const DashboardPage: React.FC = () => {
           )}
 
           <Card style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-            <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-ink)', marginBottom: 'var(--space-4)' }}>
-              Recent Activity
-            </h3>
+            <h3 className="section-title" style={{ marginBottom: 'var(--space-5)' }}>Recent Activity</h3>
             {recent_activity.length === 0 ? (
               <div style={{ color: 'var(--color-neutral)', fontSize: '0.875rem' }}>No recent activity to display.</div>
             ) : (

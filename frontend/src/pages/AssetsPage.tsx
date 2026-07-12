@@ -89,43 +89,35 @@ const AssetsPage: React.FC = () => {
   }
 
   return (
-    <div style={{ padding: 'var(--space-6)', maxWidth: 1200, margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-6)' }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', color: 'var(--color-ink)', margin: 0 }}>
-          Asset Directory
-        </h1>
+    <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+      <div className="page-header">
+        <h1 className="page-title">Asset Directory</h1>
         {canRegister && (
-          <Button onClick={() => setIsRegisterOpen(true)}>+ Register Asset</Button>
+          <Button onClick={() => setIsRegisterOpen(true)} size="sm">+ Register Asset</Button>
         )}
       </div>
 
-      <Card padding="md" style={{ marginBottom: 'var(--space-6)' }}>
-        <div style={{ display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap' }}>
-          <input 
-            type="text" 
-            placeholder="Search by tag, serial, or name..." 
+      <Card padding="sm" style={{ marginBottom: 0 }}>
+        <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap', alignItems: 'center' }}>
+          <input
+            type="text"
+            placeholder="Search by tag, serial, or name..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            style={{ 
-              flex: '1 1 250px',
-              padding: '8px 12px',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--color-border)',
-              fontFamily: 'var(--font-body)',
-            }}
+            style={{ flex: '1 1 220px', minWidth: 0 }}
           />
-          <select 
-            value={selectedCategory} 
+          <select
+            value={selectedCategory}
             onChange={e => setSelectedCategory(e.target.value ? Number(e.target.value) : '')}
-            style={{ padding: '8px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}
+            style={{ flex: '0 0 140px' }}
           >
             <option value="">All Categories</option>
             {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
-          <select 
-            value={selectedStatus} 
+          <select
+            value={selectedStatus}
             onChange={e => setSelectedStatus(e.target.value as AssetStatus | '')}
-            style={{ padding: '8px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}
+            style={{ flex: '0 0 130px' }}
           >
             <option value="">All Statuses</option>
             <option value="available">Available</option>
@@ -133,10 +125,10 @@ const AssetsPage: React.FC = () => {
             <option value="maintenance">Maintenance</option>
             <option value="lost">Lost</option>
           </select>
-          <select 
-            value={selectedDepartment} 
+          <select
+            value={selectedDepartment}
             onChange={e => setSelectedDepartment(e.target.value ? Number(e.target.value) : '')}
-            style={{ padding: '8px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}
+            style={{ flex: '0 0 150px' }}
           >
             <option value="">All Departments</option>
             {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
@@ -145,33 +137,33 @@ const AssetsPage: React.FC = () => {
       </Card>
 
       <Card padding="none" style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+        <table className="af-table">
           <thead>
-            <tr style={{ borderBottom: '1px solid var(--color-border)', backgroundColor: 'var(--color-neutral-light)' }}>
-              <th style={{ padding: 'var(--space-4)', fontWeight: 600, color: 'var(--color-ink)' }}>Tag</th>
-              <th style={{ padding: 'var(--space-4)', fontWeight: 600, color: 'var(--color-ink)' }}>Name</th>
-              <th style={{ padding: 'var(--space-4)', fontWeight: 600, color: 'var(--color-ink)' }}>Category</th>
-              <th style={{ padding: 'var(--space-4)', fontWeight: 600, color: 'var(--color-ink)' }}>Status</th>
-              <th style={{ padding: 'var(--space-4)', fontWeight: 600, color: 'var(--color-ink)' }}>Location</th>
+            <tr>
+              <th>Tag</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Location</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={5} style={{ padding: 'var(--space-4)', textAlign: 'center' }}>Loading...</td></tr>
+              <tr><td colSpan={5} style={{ padding: 'var(--space-8)', textAlign: 'center', color: 'var(--color-muted)' }}>Loading assets…</td></tr>
             ) : assets.length === 0 ? (
-              <tr><td colSpan={5} style={{ padding: 'var(--space-4)', textAlign: 'center' }}>No assets found.</td></tr>
+              <tr><td colSpan={5} style={{ padding: 'var(--space-8)', textAlign: 'center', color: 'var(--color-muted)' }}>No assets found.</td></tr>
             ) : (
               assets.map(asset => (
-                <tr key={asset.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
-                  <td style={{ padding: 'var(--space-3) var(--space-4)', fontFamily: 'var(--font-mono)' }}>{asset.tag}</td>
-                  <td style={{ padding: 'var(--space-3) var(--space-4)' }}>{asset.name}</td>
-                  <td style={{ padding: 'var(--space-3) var(--space-4)' }}>{asset.category_name || '—'}</td>
-                  <td style={{ padding: 'var(--space-3) var(--space-4)' }}>
-                    <Badge tone={statusToTone(asset.status)}>
+                <tr key={asset.id}>
+                  <td><span className="asset-tag">{asset.tag}</span></td>
+                  <td style={{ fontWeight: 500 }}>{asset.name}</td>
+                  <td style={{ color: 'var(--color-muted)' }}>{asset.category_name || '—'}</td>
+                  <td>
+                    <Badge tone={statusToTone(asset.status)} dot>
                       {asset.status.charAt(0).toUpperCase() + asset.status.slice(1)}
                     </Badge>
                   </td>
-                  <td style={{ padding: 'var(--space-3) var(--space-4)' }}>{asset.location || '—'}</td>
+                  <td style={{ color: 'var(--color-muted)' }}>{asset.location || '—'}</td>
                 </tr>
               ))
             )}
@@ -187,74 +179,53 @@ const AssetsPage: React.FC = () => {
         >
           <form id="register-asset-form" onSubmit={handleRegisterSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}>Tag *</label>
-                <input 
-                  required
-                  value={formData.tag} 
-                  onChange={e => setFormData({ ...formData, tag: e.target.value })}
-                  style={{ width: '100%', padding: '8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)' }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}>Name *</label>
-                <input 
-                  required
-                  value={formData.name} 
-                  onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  style={{ width: '100%', padding: '8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)' }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}>Serial Number</label>
-                <input 
-                  value={formData.serial_number || ''} 
-                  onChange={e => setFormData({ ...formData, serial_number: e.target.value })}
-                  style={{ width: '100%', padding: '8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)' }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}>Category</label>
-                <select 
+              {[
+                { label: 'Tag *', key: 'tag', type: 'text', required: true },
+                { label: 'Name *', key: 'name', type: 'text', required: true },
+                { label: 'Serial Number', key: 'serial_number', type: 'text' },
+                { label: 'Location', key: 'location', type: 'text' },
+              ].map(({ label, key, type, required }) => (
+                <div key={key} className="form-field">
+                  <label className="form-label">{label}</label>
+                  <input
+                    type={type}
+                    required={required}
+                    value={(formData as any)[key] || ''}
+                    onChange={e => setFormData({ ...formData, [key]: e.target.value })}
+                  />
+                </div>
+              ))}
+              <div className="form-field">
+                <label className="form-label">Category</label>
+                <select
                   value={formData.category_id || ''}
                   onChange={e => setFormData({ ...formData, category_id: e.target.value ? Number(e.target.value) : null })}
-                  style={{ width: '100%', padding: '8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)' }}
                 >
                   <option value="">None</option>
                   {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}>Department</label>
-                <select 
+              <div className="form-field">
+                <label className="form-label">Department</label>
+                <select
                   value={formData.department_id || ''}
                   onChange={e => setFormData({ ...formData, department_id: e.target.value ? Number(e.target.value) : null })}
-                  style={{ width: '100%', padding: '8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)' }}
                 >
                   <option value="">None</option>
                   {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
                 </select>
               </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}>Status</label>
-                <select 
+              <div className="form-field" style={{ gridColumn: '1 / -1' }}>
+                <label className="form-label">Status</label>
+                <select
                   value={formData.status}
                   onChange={e => setFormData({ ...formData, status: e.target.value as AssetStatus })}
-                  style={{ width: '100%', padding: '8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)' }}
                 >
                   <option value="available">Available</option>
                   <option value="allocated">Allocated</option>
                   <option value="maintenance">Maintenance</option>
                   <option value="lost">Lost</option>
                 </select>
-              </div>
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}>Location</label>
-                <input 
-                  value={formData.location || ''} 
-                  onChange={e => setFormData({ ...formData, location: e.target.value })}
-                  style={{ width: '100%', padding: '8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)' }}
-                />
               </div>
             </div>
             {registerMutation.isError && (
