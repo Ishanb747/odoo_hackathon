@@ -9,7 +9,7 @@ import { getStoredToken } from './auth'
 // ── Types ─────────────────────────────────────────────────────
 
 export type DeptStatus = 'active' | 'inactive'
-export type EmployeeRole = 'employee' | 'asset_manager' | 'admin'
+export type EmployeeRole = 'employee' | 'asset_manager' | 'admin' | 'superadmin'
 
 export interface DepartmentOut {
   id: number

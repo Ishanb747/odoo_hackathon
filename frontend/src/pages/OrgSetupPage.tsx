@@ -428,6 +428,7 @@ const EmployeesTab: React.FC = () => {
                   <option value="employee">Employee</option>
                   <option value="asset_manager">Asset Manager</option>
                   <option value="admin">Admin</option>
+                  {user?.role === 'superadmin' && <option value="superadmin">Superadmin</option>}
                 </select>
               </td>
             </tr>
@@ -449,8 +450,13 @@ const OrgSetupPage: React.FC = () => {
   const [addTriggered, setAddTriggered] = useState(false)
 
   // Redirect non-admin users
-  if (user && user.role !== 'admin') {
-    navigate('/app/dashboard', { replace: true })
+  useEffect(() => {
+    if (user && user.role !== 'admin' && user.role !== 'superadmin') {
+      navigate('/app/dashboard', { replace: true })
+    }
+  }, [user, navigate])
+
+  if (user && user.role !== 'admin' && user.role !== 'superadmin') {
     return null
   }
 

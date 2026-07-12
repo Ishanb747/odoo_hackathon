@@ -105,9 +105,11 @@ def get_current_user(
 
 
 def require_admin(current_user: Annotated[Employee, Depends(get_current_user)]) -> Employee:
-    """Dependency that enforces admin-only access."""
-    if current_user.role != EmployeeRole.admin:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
+    if current_user.role not in (EmployeeRole.admin, EmployeeRole.superadmin):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin privileges required"
+        )
     return current_user
 
 

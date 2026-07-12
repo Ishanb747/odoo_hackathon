@@ -13,6 +13,7 @@ class EmployeeRole(str, enum.Enum):
     employee = "employee"
     asset_manager = "asset_manager"
     admin = "admin"
+    superadmin = "superadmin"
 
 
 class Employee(Base):

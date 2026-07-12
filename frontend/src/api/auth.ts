@@ -10,7 +10,7 @@ export const TOKEN_KEY = 'af_token'
 
 // ── Types ─────────────────────────────────────────────────────
 
-export type EmployeeRole = 'employee' | 'asset_manager' | 'admin'
+export type EmployeeRole = 'employee' | 'asset_manager' | 'admin' | 'superadmin'
 
 export interface UserOut {
   id: number
