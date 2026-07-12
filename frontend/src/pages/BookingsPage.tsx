@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from 'react'
 import { format, parse, differenceInMinutes } from 'date-fns'
-import { useGetBookings, useCreateBooking, BookingError } from '../api/bookings'
+import { useGetBookings, useCreateBooking, useGetResources, BookingError } from '../api/bookings'
 
 const START_HOUR = 9
 const END_HOUR = 17
 const HOUR_HEIGHT = 90 // slightly taller for a roomier feel
 
-const RESOURCES = [
-  "Conference room B2",
-  "Boardroom A",
-  "Projector X1",
-  "Company Vehicle - Van 1"
-]
-
 const BookingsPage: React.FC = () => {
-  const [resource, setResource] = useState(RESOURCES[0])
+  const { data: dynamicResources = [], isLoading: loadingResources } = useGetResources()
+  const [resource, setResource] = useState("")
+  
+  // Set default resource once loaded
+  useEffect(() => {
+    if (dynamicResources.length > 0 && !resource) {
+      setResource(dynamicResources[0])
+    }
+  }, [dynamicResources, resource])
+
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'))
   
   const [newStart, setNewStart] = useState("09:00")
@@ -131,7 +133,8 @@ const BookingsPage: React.FC = () => {
               onMouseOver={e => e.currentTarget.style.borderColor = 'var(--color-primary)'}
               onMouseOut={e => e.currentTarget.style.borderColor = 'var(--color-border)'}
             >
-              {RESOURCES.map(r => <option key={r} value={r}>{r}</option>)}
+              {loadingResources && <option value="">Loading...</option>}
+              {dynamicResources.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
             <span style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--color-neutral-dark)' }}>▼</span>
           </div>

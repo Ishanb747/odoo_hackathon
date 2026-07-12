@@ -42,6 +42,20 @@ const getHeaders = () => {
   }
 }
 
+export const useGetResources = () => {
+  return useQuery<string[]>({
+    queryKey: ['bookable_resources'],
+    queryFn: async () => {
+      const url = new URL(`${API_BASE}/api/bookings/resources`)
+      const res = await fetch(url.toString(), {
+        headers: getHeaders(),
+      })
+      if (!res.ok) throw new Error('Failed to fetch resources')
+      return res.json()
+    }
+  })
+}
+
 export const useGetBookings = (resource_name: string, date: string) => {
   return useQuery<BookingResponse[]>({
     queryKey: ['bookings', resource_name, date],

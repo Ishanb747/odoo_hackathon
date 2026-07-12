@@ -30,6 +30,19 @@ class BookingResponse(BookingBase):
     class Config:
         from_attributes = True
 
+@router.get("/resources", response_model=List[str])
+def get_bookable_resources(db: Session = Depends(get_db)):
+    """Fetch all unique resource names that can be booked (Rooms, Vehicles, Projectors)."""
+    # Import Asset locally or at top to avoid circular if any, but top is fine.
+    # Actually we need to import Asset at the top. Let's assume we can just do it locally for safety.
+    from models.asset import Asset
+    assets = db.query(Asset).filter(
+        Asset.category_name.in_(["Rooms", "Vehicles", "Projectors"])
+    ).all()
+    
+    names = [a.name for a in assets]
+    return sorted(list(set(names)))
+
 @router.get("", response_model=List[BookingResponse])
 def get_bookings(
     resource_name: Optional[str] = None,
