@@ -15,6 +15,11 @@ import {
 import AssetsPage from './pages/AssetsPage'
 import AllocationPage from './pages/AllocationPage'
 import DashboardPage from './pages/DashboardPage'
+import { DashboardPage } from './pages/PlaceholderPage'
+import AssetsPage from './pages/AssetsPage'
+import AllocationPage from './pages/AllocationPage'
+import ReportsPage from './pages/ReportsPage'
+import NotificationsPage from './pages/NotificationsPage'
 
 /**
  * ProtectedRoute — redirects to /login if the user is not authenticated.
