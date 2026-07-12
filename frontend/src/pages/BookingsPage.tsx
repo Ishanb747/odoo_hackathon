@@ -1,24 +1,16 @@
 import React, { useState, useEffect } from 'react'
-import { format, parse, differenceInMinutes } from 'date-fns'
+import { format, parse, differenceInMinutes, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isToday, isSameDay } from 'date-fns'
 import { useGetBookings, useCreateBooking, useGetResources, BookingError } from '../api/bookings'
 
 const START_HOUR = 9
 const END_HOUR = 17
-const HOUR_HEIGHT = 90 // slightly taller for a roomier feel
+const HOUR_HEIGHT = 90
 
-const BookingsPage: React.FC = () => {
-  const { data: dynamicResources = [], isLoading: loadingResources } = useGetResources()
-  const [resource, setResource] = useState("")
-  
-  // Set default resource once loaded
-  useEffect(() => {
-    if (dynamicResources.length > 0 && !resource) {
-      setResource(dynamicResources[0])
-    }
-  }, [dynamicResources, resource])
-
+// ─────────────────────────────────────────────────────────────────────────────
+// TIMELINE VIEW (For Rooms)
+// ─────────────────────────────────────────────────────────────────────────────
+const TimelineView: React.FC<{ resource: string }> = ({ resource }) => {
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'))
-  
   const [newStart, setNewStart] = useState("09:00")
   const [newEnd, setNewEnd] = useState("10:00")
   
@@ -34,17 +26,10 @@ const BookingsPage: React.FC = () => {
   const handleBook = () => {
     setConflictRequest(null)
     setConflictMsg(null)
-    
     const startTimeStr = newStart.length === 5 ? `${newStart}:00` : newStart
     const endTimeStr = newEnd.length === 5 ? `${newEnd}:00` : newEnd
-
     createBooking.mutate(
-      {
-        resource_name: resource,
-        date: date,
-        start_time: startTimeStr,
-        end_time: endTimeStr,
-      },
+      { resource_name: resource, date, start_time: startTimeStr, end_time: endTimeStr },
       {
         onSuccess: () => {
           setNewStart("09:00")
@@ -65,353 +50,314 @@ const BookingsPage: React.FC = () => {
   const getStyleForTimeRange = (start: string, end: string) => {
     const s = start.substring(0, 5)
     const e = end.substring(0, 5)
-    
     const startMins = differenceInMinutes(parse(s, 'HH:mm', new Date()), parse(`${START_HOUR}:00`, 'H:mm', new Date()))
     const endMins = differenceInMinutes(parse(e, 'HH:mm', new Date()), parse(`${START_HOUR}:00`, 'H:mm', new Date()))
-    
-    const top = (startMins / 60) * HOUR_HEIGHT
-    const height = ((endMins - startMins) / 60) * HOUR_HEIGHT
-    
-    return { top: `${top}px`, height: `${height}px` }
+    return { top: `${(startMins / 60) * HOUR_HEIGHT}px`, height: `${((endMins - startMins) / 60) * HOUR_HEIGHT}px` }
   }
 
   return (
-    <div style={{ 
-      maxWidth: 1200, 
-      margin: '0 auto', 
-      padding: 'var(--space-10)',
-      opacity: mounted ? 1 : 0,
-      transform: mounted ? 'translateY(0)' : 'translateY(20px)',
-      transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
-    }}>
-      
-      {/* Header section */}
-      <header style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'flex-end', 
-        marginBottom: 'var(--space-12)' 
-      }}>
-        <div>
-          <h1 style={{ 
-            fontFamily: 'var(--font-display)', 
-            fontSize: 'clamp(2rem, 4vw, 3rem)', 
-            fontWeight: 700, 
-            letterSpacing: '-0.03em', 
-            margin: '0 0 var(--space-2)' 
-          }}>
-            Resource Booking
-          </h1>
-          <p style={{ 
-            color: 'var(--color-neutral-dark)', 
-            fontSize: 'var(--text-lg)', 
-            margin: 0 
-          }}>
-            Select a resource and date to view or book time slots.
-          </p>
-        </div>
-
-        <div style={{ display: 'flex', gap: 'var(--space-4)' }}>
-          <div style={{ position: 'relative' }}>
-            <select 
-              value={resource} 
-              onChange={e => setResource(e.target.value)}
-              style={{ 
-                appearance: 'none',
-                padding: '12px 40px 12px 16px', 
-                borderRadius: 'var(--radius-full)', 
-                border: '1px solid var(--color-border)', 
-                backgroundColor: 'var(--color-surface)',
-                fontFamily: 'var(--font-body)',
-                fontSize: 'var(--text-sm)',
-                fontWeight: 600,
-                color: 'var(--color-ink)',
-                cursor: 'pointer',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseOver={e => e.currentTarget.style.borderColor = 'var(--color-primary)'}
-              onMouseOut={e => e.currentTarget.style.borderColor = 'var(--color-border)'}
-            >
-              {loadingResources && <option value="">Loading...</option>}
-              {dynamicResources.map(r => <option key={r} value={r}>{r}</option>)}
-            </select>
-            <span style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--color-neutral-dark)' }}>▼</span>
-          </div>
-          
+    <div style={{ display: 'flex', gap: 'var(--space-10)', alignItems: 'flex-start', animation: 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+      <div style={{ flex: '1', backgroundColor: 'var(--color-surface)', borderRadius: '24px', padding: 'var(--space-8)', border: '1px solid var(--color-border)', boxShadow: '0 20px 40px rgba(0,0,0,0.04)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: -100, right: -100, width: 300, height: 300, background: 'radial-gradient(circle, var(--color-primary-light) 0%, transparent 70%)', opacity: 0.5, pointerEvents: 'none' }} />
+        
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-8)', paddingBottom: 'var(--space-6)', borderBottom: '1px solid var(--color-border)' }}>
+          <h2 style={{ fontSize: 'var(--text-xl)', fontFamily: 'var(--font-display)', fontWeight: 600, margin: 0, letterSpacing: '-0.01em', display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+            <span style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: 'var(--color-success)', display: 'inline-block' }} />
+            {resource}
+          </h2>
           <input 
             type="date" 
             value={date} 
             onChange={e => setDate(e.target.value)}
-            style={{ 
-              padding: '12px 16px', 
-              borderRadius: 'var(--radius-full)', 
-              border: '1px solid var(--color-border)', 
-              backgroundColor: 'var(--color-surface)',
-              fontFamily: 'var(--font-mono)',
-              fontSize: 'var(--text-sm)',
-              fontWeight: 600,
-              color: 'var(--color-ink)',
-              cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseOver={e => e.currentTarget.style.borderColor = 'var(--color-primary)'}
-            onMouseOut={e => e.currentTarget.style.borderColor = 'var(--color-border)'}
+            style={{ padding: '8px 12px', borderRadius: 'var(--radius-full)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-canvas)', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--color-ink)', cursor: 'pointer', transition: 'all 0.2s ease' }}
           />
         </div>
-      </header>
 
-      <div style={{ display: 'flex', gap: 'var(--space-10)', alignItems: 'flex-start' }}>
-        
-        {/* Calendar / Timeline */}
-        <div style={{ 
-          flex: '1', 
-          backgroundColor: 'var(--color-surface)', 
-          borderRadius: '24px', 
-          padding: 'var(--space-8)', 
-          border: '1px solid var(--color-border)',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.04)',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          {/* Subtle background glow */}
-          <div style={{ position: 'absolute', top: -100, right: -100, width: 300, height: 300, background: 'radial-gradient(circle, var(--color-primary-light) 0%, transparent 70%)', opacity: 0.5, pointerEvents: 'none' }} />
+        <div style={{ position: 'relative' }}>
+          {Array.from({ length: END_HOUR - START_HOUR + 1 }).map((_, i) => (
+            <div key={i} style={{ display: 'flex', height: HOUR_HEIGHT, borderTop: '1px dashed var(--color-border)' }}>
+              <span style={{ width: 70, textAlign: 'right', paddingRight: 'var(--space-5)', transform: 'translateY(-50%)', color: 'var(--color-neutral-dark)', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', fontWeight: 600, backgroundColor: 'var(--color-surface)' }}>
+                {START_HOUR + i}:00
+              </span>
+              <div style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.01)' }} />
+            </div>
+          ))}
 
-          <h2 style={{ 
-            fontSize: 'var(--text-xl)', 
-            fontFamily: 'var(--font-display)',
-            fontWeight: 600,
-            marginBottom: 'var(--space-8)', 
-            paddingBottom: 'var(--space-6)',
-            borderBottom: '1px solid var(--color-border)',
-            margin: '0 0 var(--space-8) 0',
-            letterSpacing: '-0.01em',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--space-3)'
-          }}>
-            <span style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: 'var(--color-success)', display: 'inline-block' }} />
-            {resource} <span style={{ color: 'var(--color-neutral)', fontWeight: 400 }}>—</span> {format(parse(date, 'yyyy-MM-dd', new Date()), 'EEE, d MMM')}
-          </h2>
-
-          <div style={{ position: 'relative' }}>
-            {/* Hour Grid Lines */}
-            {Array.from({ length: END_HOUR - START_HOUR + 1 }).map((_, i) => (
-              <div key={i} style={{ display: 'flex', height: HOUR_HEIGHT, borderTop: '1px dashed var(--color-border)' }}>
-                <span style={{ 
-                  width: 70, 
-                  textAlign: 'right', 
-                  paddingRight: 'var(--space-5)', 
-                  transform: 'translateY(-50%)',
-                  color: 'var(--color-neutral-dark)',
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 'var(--text-xs)',
-                  fontWeight: 600,
-                  backgroundColor: 'var(--color-surface)'
-                }}>
-                  {START_HOUR + i}:00
-                </span>
-                <div style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.01)' }} />
-              </div>
-            ))}
-
-            {/* Bookings Container */}
-            <div style={{ position: 'absolute', top: 0, left: 70, right: 0, bottom: 0 }}>
-              
-              {/* Existing Bookings */}
-              {bookings.map((b, idx) => {
-                if (b.status !== 'confirmed') return null
-                const style = getStyleForTimeRange(b.start_time, b.end_time)
-                return (
-                  <div 
-                    key={b.id} 
-                    style={{
-                      position: 'absolute',
-                      left: 'var(--space-4)',
-                      right: 'var(--space-4)',
-                      top: style.top,
-                      height: style.height,
-                      backgroundColor: 'rgba(108, 99, 255, 0.95)',
-                      backdropFilter: 'blur(10px)',
-                      color: 'white',
-                      borderRadius: '16px',
-                      padding: 'var(--space-3) var(--space-5)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center',
-                      boxShadow: '0 8px 24px rgba(108, 99, 255, 0.25)',
-                      zIndex: 10,
-                      transform: mounted ? 'scale(1)' : 'scale(0.95)',
-                      opacity: mounted ? 1 : 0,
-                      transition: `all 0.5s cubic-bezier(0.16, 1, 0.3, 1) ${idx * 0.1}s`,
-                      border: '1px solid rgba(255,255,255,0.2)'
-                    }}
-                  >
-                    <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600, letterSpacing: '0.02em' }}>{b.employee_name}</div>
-                    <div style={{ fontSize: 'var(--text-xs)', opacity: 0.8, fontFamily: 'var(--font-mono)', marginTop: 4 }}>
-                      {b.start_time.substring(0, 5)} - {b.end_time.substring(0, 5)}
-                    </div>
-                  </div>
-                )
-              })}
-
-              {/* Conflict Outline */}
-              {conflictRequest && (
-                <div 
-                  style={{
-                    position: 'absolute',
-                    left: 'var(--space-2)',
-                    right: 'var(--space-2)',
-                    top: getStyleForTimeRange(conflictRequest.start, conflictRequest.end).top,
-                    height: getStyleForTimeRange(conflictRequest.start, conflictRequest.end).height,
-                    border: '2px dashed var(--color-danger)',
-                    borderRadius: '16px',
-                    backgroundColor: 'rgba(255, 107, 107, 0.08)',
-                    padding: 'var(--space-3) var(--space-5)',
-                    color: 'var(--color-danger)',
-                    zIndex: 20,
-                    pointerEvents: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    animation: 'shake 0.4s cubic-bezier(.36,.07,.19,.97) both',
-                  }}
-                >
-                  <div style={{ 
-                    backgroundColor: 'white', 
-                    padding: '6px 12px', 
-                    borderRadius: 'var(--radius-full)', 
-                    boxShadow: '0 4px 12px rgba(255, 107, 107, 0.2)',
-                    fontSize: 'var(--text-sm)',
-                    fontWeight: 600,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8
-                  }}>
-                    <span style={{ fontSize: 16 }}>⚠️</span>
-                    {conflictMsg}
+          <div style={{ position: 'absolute', top: 0, left: 70, right: 0, bottom: 0 }}>
+            {bookings.map((b, idx) => {
+              if (b.status !== 'confirmed') return null
+              const style = getStyleForTimeRange(b.start_time, b.end_time)
+              return (
+                <div key={b.id} style={{ position: 'absolute', left: 'var(--space-4)', right: 'var(--space-4)', top: style.top, height: style.height, backgroundColor: 'rgba(108, 99, 255, 0.95)', backdropFilter: 'blur(10px)', color: 'white', borderRadius: '16px', padding: 'var(--space-3) var(--space-5)', display: 'flex', flexDirection: 'column', justifyContent: 'center', boxShadow: '0 8px 24px rgba(108, 99, 255, 0.25)', zIndex: 10, transform: mounted ? 'scale(1)' : 'scale(0.95)', opacity: mounted ? 1 : 0, transition: `all 0.5s cubic-bezier(0.16, 1, 0.3, 1) ${idx * 0.1}s`, border: '1px solid rgba(255,255,255,0.2)' }}>
+                  <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600, letterSpacing: '0.02em' }}>{b.employee_name}</div>
+                  <div style={{ fontSize: 'var(--text-xs)', opacity: 0.8, fontFamily: 'var(--font-mono)', marginTop: 4 }}>
+                    {b.start_time.substring(0, 5)} - {b.end_time.substring(0, 5)}
                   </div>
                 </div>
-              )}
-            </div>
-          </div>
-        </div>
+              )
+            })}
 
-        {/* Action Panel (Right Side) */}
-        <div style={{ 
-          width: 360, 
-          flexShrink: 0, 
-          backgroundColor: 'var(--color-surface)', 
-          borderRadius: '24px', 
-          padding: 'var(--space-8)', 
-          border: '1px solid var(--color-border)',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.04)',
-          position: 'sticky',
-          top: 'var(--space-8)'
-        }}>
-          <h3 style={{ 
-            fontSize: 'var(--text-lg)', 
-            fontFamily: 'var(--font-display)',
-            fontWeight: 600,
-            margin: '0 0 var(--space-6)',
-            letterSpacing: '-0.01em'
-          }}>
-            Request Slot
-          </h3>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
-            <div>
-              <label style={{ 
-                display: 'block', 
-                fontSize: 'var(--text-xs)', 
-                fontWeight: 600, 
-                textTransform: 'uppercase', 
-                letterSpacing: '0.05em', 
-                color: 'var(--color-neutral)', 
-                marginBottom: 'var(--space-2)' 
-              }}>Start Time</label>
-              <input 
-                type="time" 
-                value={newStart} 
-                onChange={e => setNewStart(e.target.value)}
-                style={{ 
-                  width: '100%', 
-                  padding: '14px 16px', 
-                  borderRadius: '12px', 
-                  border: '1px solid var(--color-border)', 
-                  backgroundColor: 'var(--color-canvas)',
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 'var(--text-sm)',
-                  fontWeight: 600,
-                  transition: 'all 0.2s ease',
-                  outline: 'none'
-                }}
-                onFocus={e => e.currentTarget.style.borderColor = 'var(--color-primary)'}
-                onBlur={e => e.currentTarget.style.borderColor = 'var(--color-border)'}
-              />
-            </div>
-            
-            <div>
-              <label style={{ 
-                display: 'block', 
-                fontSize: 'var(--text-xs)', 
-                fontWeight: 600, 
-                textTransform: 'uppercase', 
-                letterSpacing: '0.05em', 
-                color: 'var(--color-neutral)', 
-                marginBottom: 'var(--space-2)' 
-              }}>End Time</label>
-              <input 
-                type="time" 
-                value={newEnd} 
-                onChange={e => setNewEnd(e.target.value)}
-                style={{ 
-                  width: '100%', 
-                  padding: '14px 16px', 
-                  borderRadius: '12px', 
-                  border: '1px solid var(--color-border)', 
-                  backgroundColor: 'var(--color-canvas)',
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 'var(--text-sm)',
-                  fontWeight: 600,
-                  transition: 'all 0.2s ease',
-                  outline: 'none'
-                }}
-                onFocus={e => e.currentTarget.style.borderColor = 'var(--color-primary)'}
-                onBlur={e => e.currentTarget.style.borderColor = 'var(--color-border)'}
-              />
-            </div>
-
-            <button 
-              onClick={handleBook}
-              disabled={createBooking.isPending}
-              style={{
-                marginTop: 'var(--space-6)',
-                backgroundColor: 'var(--color-primary)',
-                color: 'white',
-                border: 'none',
-                padding: '16px',
-                borderRadius: 'var(--radius-full)',
-                fontWeight: 600,
-                fontSize: 'var(--text-md)',
-                cursor: 'pointer',
-                fontFamily: 'var(--font-body)',
-                boxShadow: '0 8px 20px rgba(108, 99, 255, 0.3)',
-                transition: 'all 0.2s ease',
-                transform: createBooking.isPending ? 'scale(0.98)' : 'scale(1)',
-                opacity: createBooking.isPending ? 0.8 : 1
-              }}
-              onMouseOver={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-              onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
-            >
-              {createBooking.isPending ? 'Booking...' : 'Book a slot'}
-            </button>
+            {conflictRequest && (
+              <div style={{ position: 'absolute', left: 'var(--space-2)', right: 'var(--space-2)', top: getStyleForTimeRange(conflictRequest.start, conflictRequest.end).top, height: getStyleForTimeRange(conflictRequest.start, conflictRequest.end).height, border: '2px dashed var(--color-danger)', borderRadius: '16px', backgroundColor: 'rgba(255, 107, 107, 0.08)', padding: 'var(--space-3) var(--space-5)', color: 'var(--color-danger)', zIndex: 20, pointerEvents: 'none', display: 'flex', alignItems: 'center', animation: 'shake 0.4s cubic-bezier(.36,.07,.19,.97) both' }}>
+                <div style={{ backgroundColor: 'white', padding: '6px 12px', borderRadius: 'var(--radius-full)', boxShadow: '0 4px 12px rgba(255, 107, 107, 0.2)', fontSize: 'var(--text-sm)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 16 }}>⚠️</span>{conflictMsg}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      <div style={{ width: 360, flexShrink: 0, backgroundColor: 'var(--color-surface)', borderRadius: '24px', padding: 'var(--space-8)', border: '1px solid var(--color-border)', boxShadow: '0 20px 40px rgba(0,0,0,0.04)', position: 'sticky', top: 'var(--space-8)' }}>
+        <h3 style={{ fontSize: 'var(--text-lg)', fontFamily: 'var(--font-display)', fontWeight: 600, margin: '0 0 var(--space-6)', letterSpacing: '-0.01em' }}>Request Slot</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: 'var(--text-xs)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-neutral)', marginBottom: 'var(--space-2)' }}>Start Time</label>
+            <input type="time" value={newStart} onChange={e => setNewStart(e.target.value)} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-canvas)', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-sm)', fontWeight: 600, transition: 'all 0.2s ease', outline: 'none' }} />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: 'var(--text-xs)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-neutral)', marginBottom: 'var(--space-2)' }}>End Time</label>
+            <input type="time" value={newEnd} onChange={e => setNewEnd(e.target.value)} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-canvas)', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-sm)', fontWeight: 600, transition: 'all 0.2s ease', outline: 'none' }} />
+          </div>
+          <button onClick={handleBook} disabled={createBooking.isPending} style={{ marginTop: 'var(--space-6)', backgroundColor: 'var(--color-primary)', color: 'white', border: 'none', padding: '16px', borderRadius: 'var(--radius-full)', fontWeight: 600, fontSize: 'var(--text-md)', cursor: 'pointer', fontFamily: 'var(--font-body)', boxShadow: '0 8px 20px rgba(108, 99, 255, 0.3)', transition: 'all 0.2s ease', opacity: createBooking.isPending ? 0.8 : 1 }}>
+            {createBooking.isPending ? 'Booking...' : 'Book a slot'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CALENDAR VIEW (For Vehicles/Projectors)
+// ─────────────────────────────────────────────────────────────────────────────
+const CalendarView: React.FC<{ resource: string }> = ({ resource }) => {
+  const [currentMonth, setCurrentMonth] = useState(new Date())
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  
+  // Fetch ALL bookings for this resource (no date filter)
+  const { data: allBookings = [] } = useGetBookings(resource)
+  const createBooking = useCreateBooking()
+
+  const [newStart, setNewStart] = useState("09:00")
+  const [newEnd, setNewEnd] = useState("17:00")
+  const [conflictMsg, setConflictMsg] = useState<string | null>(null)
+
+  const monthStart = startOfMonth(currentMonth)
+  const monthEnd = endOfMonth(monthStart)
+  const startDate = startOfWeek(monthStart)
+  const endDate = endOfWeek(monthEnd)
+  const calendarDays = eachDayOfInterval({ start: startDate, end: endDate })
+
+  const handleBook = () => {
+    if (!selectedDate) return
+    setConflictMsg(null)
+    const dateStr = format(selectedDate, 'yyyy-MM-dd')
+    const startTimeStr = newStart.length === 5 ? `${newStart}:00` : newStart
+    const endTimeStr = newEnd.length === 5 ? `${newEnd}:00` : newEnd
+
+    createBooking.mutate(
+      { resource_name: resource, date: dateStr, start_time: startTimeStr, end_time: endTimeStr },
+      {
+        onSuccess: () => {
+          setSelectedDate(null) // Close panel or just clear
+        },
+        onError: (err: BookingError) => {
+          if (err.message === 'conflict' && err.conflicting_booking) {
+            setConflictMsg(`Conflict: slot is unavailable on ${dateStr}`)
+          } else {
+            alert(err.message || 'An error occurred')
+          }
+        }
+      }
+    )
+  }
+
+  return (
+    <div style={{ display: 'flex', gap: 'var(--space-10)', alignItems: 'flex-start', animation: 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }}>
       
-      {/* Inline styles for shake animation */}
+      <div style={{ flex: '1', backgroundColor: 'var(--color-surface)', borderRadius: '24px', padding: 'var(--space-8)', border: '1px solid var(--color-border)', boxShadow: '0 20px 40px rgba(0,0,0,0.04)' }}>
+        
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-8)' }}>
+          <h2 style={{ fontSize: 'var(--text-xl)', fontFamily: 'var(--font-display)', fontWeight: 600, margin: 0, display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+            <span style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: 'var(--color-warning)', display: 'inline-block' }} />
+            {resource} Schedule
+          </h2>
+          
+          <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+            <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))} style={{ padding: '8px 16px', borderRadius: 'var(--radius-full)', border: '1px solid var(--color-border)', backgroundColor: 'transparent', cursor: 'pointer', fontWeight: 600 }}>&larr;</button>
+            <div style={{ padding: '8px 16px', fontWeight: 600, fontFamily: 'var(--font-display)', minWidth: 120, textAlign: 'center' }}>
+              {format(currentMonth, 'MMMM yyyy')}
+            </div>
+            <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))} style={{ padding: '8px 16px', borderRadius: 'var(--radius-full)', border: '1px solid var(--color-border)', backgroundColor: 'transparent', cursor: 'pointer', fontWeight: 600 }}>&rarr;</button>
+          </div>
+        </div>
+
+        {/* Calendar Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1, backgroundColor: 'var(--color-border)', border: '1px solid var(--color-border)', borderRadius: '16px', overflow: 'hidden' }}>
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+            <div key={day} style={{ backgroundColor: 'var(--color-surface)', padding: 'var(--space-3)', textAlign: 'center', fontSize: 'var(--text-xs)', fontWeight: 700, color: 'var(--color-neutral-dark)', textTransform: 'uppercase' }}>
+              {day}
+            </div>
+          ))}
+          
+          {calendarDays.map(day => {
+            const dateStr = format(day, 'yyyy-MM-dd')
+            const dayBookings = allBookings.filter(b => b.date === dateStr && b.status === 'confirmed')
+            const isSelected = selectedDate && isSameDay(day, selectedDate)
+            const isCurrentMonth = isSameMonth(day, currentMonth)
+
+            return (
+              <div 
+                key={day.toISOString()}
+                onClick={() => isCurrentMonth && setSelectedDate(day)}
+                style={{
+                  backgroundColor: isSelected ? 'var(--color-primary-light)' : 'var(--color-surface)',
+                  padding: 'var(--space-2)',
+                  minHeight: 100,
+                  cursor: isCurrentMonth ? 'pointer' : 'default',
+                  opacity: isCurrentMonth ? 1 : 0.4,
+                  transition: 'background-color 0.2s',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}
+              >
+                <div style={{ textAlign: 'right', fontWeight: 600, fontSize: 'var(--text-sm)', color: isToday(day) ? 'var(--color-primary)' : 'inherit', marginBottom: 'var(--space-2)' }}>
+                  {format(day, 'd')}
+                </div>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
+                  {dayBookings.slice(0, 2).map(b => (
+                    <div key={b.id} style={{ fontSize: 10, backgroundColor: 'rgba(108, 99, 255, 0.1)', color: 'var(--color-primary)', padding: '4px 6px', borderRadius: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 600 }}>
+                      {b.start_time.substring(0, 5)} {b.employee_name.split(' ')[0]}
+                    </div>
+                  ))}
+                  {dayBookings.length > 2 && (
+                    <div style={{ fontSize: 10, color: 'var(--color-neutral-dark)', textAlign: 'center', marginTop: 'auto' }}>
+                      +{dayBookings.length - 2} more
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Right panel for booking on a specific day */}
+      {selectedDate && (
+        <div style={{ width: 320, flexShrink: 0, backgroundColor: 'var(--color-surface)', borderRadius: '24px', padding: 'var(--space-8)', border: '1px solid var(--color-border)', boxShadow: '0 20px 40px rgba(0,0,0,0.04)', position: 'sticky', top: 'var(--space-8)', animation: 'fadeInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-6)' }}>
+            <h3 style={{ fontSize: 'var(--text-lg)', fontFamily: 'var(--font-display)', fontWeight: 600, margin: 0, letterSpacing: '-0.01em' }}>
+              {format(selectedDate, 'MMM d')}
+            </h3>
+            <button onClick={() => setSelectedDate(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 20, color: 'var(--color-neutral-dark)' }}>&times;</button>
+          </div>
+
+          {/* List existing bookings on this day */}
+          <div style={{ marginBottom: 'var(--space-6)' }}>
+            <h4 style={{ fontSize: 'var(--text-xs)', textTransform: 'uppercase', color: 'var(--color-neutral)', marginBottom: 'var(--space-3)' }}>Scheduled</h4>
+            {allBookings.filter(b => b.date === format(selectedDate, 'yyyy-MM-dd') && b.status === 'confirmed').length === 0 ? (
+              <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-neutral-dark)' }}>No bookings for this day.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+                {allBookings.filter(b => b.date === format(selectedDate, 'yyyy-MM-dd') && b.status === 'confirmed').map(b => (
+                  <div key={b.id} style={{ padding: 'var(--space-3)', backgroundColor: 'var(--color-canvas)', borderRadius: 8, border: '1px solid var(--color-border)', fontSize: 'var(--text-sm)' }}>
+                    <div style={{ fontWeight: 600 }}>{b.employee_name}</div>
+                    <div style={{ color: 'var(--color-neutral-dark)', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', marginTop: 2 }}>
+                      {b.start_time.substring(0, 5)} - {b.end_time.substring(0, 5)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)', borderTop: '1px dashed var(--color-border)', paddingTop: 'var(--space-6)' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: 'var(--text-xs)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-neutral)', marginBottom: 'var(--space-2)' }}>Start Time</label>
+              <input type="time" value={newStart} onChange={e => setNewStart(e.target.value)} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-canvas)', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-sm)', fontWeight: 600, outline: 'none' }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 'var(--text-xs)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-neutral)', marginBottom: 'var(--space-2)' }}>End Time</label>
+              <input type="time" value={newEnd} onChange={e => setNewEnd(e.target.value)} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-canvas)', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-sm)', fontWeight: 600, outline: 'none' }} />
+            </div>
+            
+            {conflictMsg && (
+              <div style={{ padding: '12px', backgroundColor: 'rgba(255, 107, 107, 0.1)', color: 'var(--color-danger)', borderRadius: 8, fontSize: 'var(--text-sm)', fontWeight: 600 }}>
+                ⚠️ {conflictMsg}
+              </div>
+            )}
+
+            <button onClick={handleBook} disabled={createBooking.isPending} style={{ marginTop: 'var(--space-2)', backgroundColor: 'var(--color-primary)', color: 'white', border: 'none', padding: '16px', borderRadius: 'var(--radius-full)', fontWeight: 600, fontSize: 'var(--text-md)', cursor: 'pointer', fontFamily: 'var(--font-body)', boxShadow: '0 8px 20px rgba(108, 99, 255, 0.3)', opacity: createBooking.isPending ? 0.8 : 1 }}>
+              {createBooking.isPending ? 'Booking...' : 'Book'}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MAIN PAGE SHELL
+// ─────────────────────────────────────────────────────────────────────────────
+const BookingsPage: React.FC = () => {
+  const { data: dynamicResources = [], isLoading: loadingResources } = useGetResources()
+  const [selectedResourceName, setSelectedResourceName] = useState("")
+  
+  useEffect(() => {
+    if (dynamicResources.length > 0 && !selectedResourceName) {
+      setSelectedResourceName(dynamicResources[0].name)
+    }
+  }, [dynamicResources, selectedResourceName])
+
+  const selectedObj = dynamicResources.find(r => r.name === selectedResourceName)
+  const isRoom = selectedObj?.category === 'Rooms'
+
+  return (
+    <div style={{ maxWidth: 1200, margin: '0 auto', padding: 'var(--space-10)' }}>
+      {/* Header */}
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 'var(--space-12)' }}>
+        <div>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, letterSpacing: '-0.03em', margin: '0 0 var(--space-2)' }}>
+            Resource Booking
+          </h1>
+          <p style={{ color: 'var(--color-neutral-dark)', fontSize: 'var(--text-lg)', margin: 0 }}>
+            {isRoom ? 'Select a room and date to view time slots.' : 'Select an asset to view its monthly availability.'}
+          </p>
+        </div>
+
+        <div style={{ position: 'relative', width: 280 }}>
+          <select 
+            value={selectedResourceName} 
+            onChange={e => setSelectedResourceName(e.target.value)}
+            style={{ appearance: 'none', width: '100%', padding: '14px 40px 14px 20px', borderRadius: 'var(--radius-full)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)', fontFamily: 'var(--font-body)', fontSize: 'var(--text-md)', fontWeight: 600, color: 'var(--color-ink)', cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}
+          >
+            {loadingResources && <option value="">Loading...</option>}
+            {dynamicResources.map(r => <option key={r.name} value={r.name}>{r.name} ({r.category})</option>)}
+          </select>
+          <span style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--color-neutral-dark)' }}>▼</span>
+        </div>
+      </header>
+
+      {/* Dynamic View Injection */}
+      {selectedResourceName && (
+        isRoom 
+          ? <TimelineView key={`timeline-${selectedResourceName}`} resource={selectedResourceName} />
+          : <CalendarView key={`calendar-${selectedResourceName}`} resource={selectedResourceName} />
+      )}
+
+      {/* Global styles for animations */}
       <style>{`
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInRight {
+          from { opacity: 0; transform: translateX(20px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
         @keyframes shake {
           10%, 90% { transform: translate3d(-1px, 0, 0); }
           20%, 80% { transform: translate3d(2px, 0, 0); }
@@ -424,4 +370,3 @@ const BookingsPage: React.FC = () => {
 }
 
 export default BookingsPage
-
