@@ -10,6 +10,7 @@ from config import settings
 from database import SessionLocal
 from routers.auth import router as auth_router
 from routers.org import router as org_router
+from routers.assets import router as assets_router
 
 app = FastAPI(
     title="AssetFlow API",
@@ -62,7 +63,7 @@ app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(org_router,  prefix="/org",  tags=["org"])
 
 # ── Future routers — append one line per phase ────────────────
-# Phase 2 (Dev):   app.include_router(assets_router, prefix="/assets", tags=["assets"])
+app.include_router(assets_router, prefix="/assets", tags=["assets"])
 # Phase 3 (Dev):   app.include_router(allocations_router, prefix="/allocations", tags=["allocations"])
 # Phase 4 (Ishan): app.include_router(bookings_router, prefix="/bookings", tags=["bookings"])
 # Phase 5 (Ishan): app.include_router(maintenance_router, prefix="/maintenance", tags=["maintenance"])
