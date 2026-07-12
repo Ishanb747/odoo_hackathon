@@ -7,7 +7,6 @@ import LoginPage from './pages/LoginPage'
 import OrgSetupPage from './pages/OrgSetupPage'
 import {
   DashboardPage,
-  AllocationPage,
   BookingPage,
   MaintenancePage,
   AuditPage,
@@ -15,6 +14,7 @@ import {
   NotificationsPage,
 } from './pages/PlaceholderPage'
 import AssetsPage from './pages/AssetsPage'
+import AllocationPage from './pages/AllocationPage'
 
 /**
  * ProtectedRoute — redirects to /login if the user is not authenticated.
