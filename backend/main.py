@@ -66,6 +66,7 @@ app.include_router(org_router,  prefix="/org",  tags=["org"])
 from routers.allocations import router as allocations_router
 from routers.maintenance import router as maintenance_router
 from routers.audits import router as audits_router
+from routers.dashboard import router as dashboard_router
 from routers.reports import router as reports_router
 from routers.notifications import router as notifications_router
 
@@ -75,5 +76,7 @@ app.include_router(allocations_router, prefix="/allocations", tags=["allocations
 app.include_router(bookings_router, prefix="/bookings", tags=["bookings"])
 app.include_router(maintenance_router, prefix="/maintenance", tags=["maintenance"])
 app.include_router(audits_router, prefix="/audits", tags=["audits"])
+app.include_router(dashboard_router, prefix="/dashboard", tags=["dashboard"])
+# Phase 7 (Ishan): app.include_router(notifications_router, prefix="/notifications", tags=["notifications"])
 app.include_router(reports_router, prefix="/reports", tags=["reports"])
 app.include_router(notifications_router, prefix="/notifications", tags=["notifications"])
