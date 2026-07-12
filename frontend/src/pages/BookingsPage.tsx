@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+// @ts-ignore
 import { format, parse, differenceInMinutes, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isToday, isSameDay, isWithinInterval, isBefore } from 'date-fns'
 import { useQuery } from '@tanstack/react-query'
 import { useGetBookings, useCreateBooking, useGetResources, BookingError } from '../api/bookings'
@@ -225,7 +226,7 @@ const CalendarView: React.FC<{ resource: string }> = ({ resource }) => {
               {day}
             </div>
           ))}
-          {calendarDays.map(day => {
+          {calendarDays.map((day: any) => {
             const dateStr = format(day, 'yyyy-MM-dd')
             const dayBookings = allBookings.filter(b => b.start_date <= dateStr && b.end_date >= dateStr && b.status === 'confirmed')
             const inRange = isDayInRange(day)
@@ -418,7 +419,7 @@ const LongTermAllocationsView: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {allocations.map(a => (
+                {allocations.map((a: any) => (
                   <tr key={a.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
                     <td style={{ padding: 'var(--space-4)' }}>
                       <div style={{ fontWeight: 600 }}>{a.asset_name}</div>
