@@ -7,9 +7,9 @@ import LoginPage from './pages/LoginPage'
 import OrgSetupPage from './pages/OrgSetupPage'
 import BookingsPage from './pages/BookingsPage'
 import MaintenancePage from './pages/MaintenancePage'
+import AuditPage from './pages/AuditPage'
 import {
   DashboardPage,
-  AuditPage,
   ReportsPage,
   NotificationsPage,
 } from './pages/PlaceholderPage'
