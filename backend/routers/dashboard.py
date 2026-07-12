@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 
 from database import get_db
 from models import (
@@ -63,9 +63,12 @@ def get_dashboard_data(
     _: Employee = Depends(get_current_user)
 ):
     # KPIs
-    available = db.query(Asset).filter(Asset.status == AssetStatus.available).count()
-    allocated = db.query(Asset).filter(Asset.status == AssetStatus.allocated).count()
-    maintenance = db.query(Asset).filter(Asset.status == AssetStatus.maintenance).count()
+    asset_counts = db.query(Asset.status, func.count(Asset.id)).group_by(Asset.status).all()
+    asset_status_map = dict(asset_counts)
+    
+    available = asset_status_map.get(AssetStatus.available, 0)
+    allocated = asset_status_map.get(AssetStatus.allocated, 0)
+    maintenance = asset_status_map.get(AssetStatus.maintenance, 0)
     
     active_bookings = db.query(Booking).filter(Booking.status == BookingStatus.confirmed).count()
     pending_transfers = db.query(TransferRequest).filter(TransferRequest.status == TransferStatus.pending).count()
@@ -85,22 +88,27 @@ def get_dashboard_data(
 
     # Overdue alerts (simulated by checking allocations older than 30 days)
     thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
-    overdue_allocations = active_allocations_query.filter(Allocation.allocated_at < thirty_days_ago).all()
+    now_utc = datetime.now(timezone.utc)
+
+    overdue_results = (
+        db.query(Allocation, Asset, Employee)
+        .join(Asset, Allocation.asset_id == Asset.id)
+        .join(Employee, Allocation.employee_id == Employee.id)
+        .filter(Allocation.returned_at == None, Allocation.allocated_at < thirty_days_ago)
+        .all()
+    )
     
     overdue_alerts = []
-    for alloc in overdue_allocations:
-        asset = db.get(Asset, alloc.asset_id)
-        emp = db.get(Employee, alloc.employee_id)
-        days = (datetime.now(timezone.utc) - alloc.allocated_at).days - 30
-        if asset and emp:
-            overdue_alerts.append(
-                OverdueAlertOut(
-                    asset_id=asset.id,
-                    asset_tag=asset.tag,
-                    allocated_to=emp.name,
-                    days_overdue=days if days > 0 else 1
-                )
+    for alloc, asset, emp in overdue_results:
+        days = (now_utc - alloc.allocated_at).days - 30
+        overdue_alerts.append(
+            OverdueAlertOut(
+                asset_id=asset.id,
+                asset_tag=asset.tag,
+                allocated_to=emp.name,
+                days_overdue=days if days > 0 else 1
             )
+        )
 
     # Recent activity
     logs = db.query(ActivityLog).order_by(desc(ActivityLog.created_at)).limit(10).all()
@@ -116,7 +124,6 @@ def get_dashboard_data(
         {"name": "Maintenance", "value": maintenance, "color": "var(--color-warning)"}
     ]
 
-    from sqlalchemy import func
     from models import Department
     
     dept_counts = (

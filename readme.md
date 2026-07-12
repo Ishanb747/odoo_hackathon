@@ -4,8 +4,8 @@
 
 ## 🚀 Deployed Link
 *Add your deployed URL here*
-- **Frontend:** `[Insert Frontend URL]`
-- **Backend API:** `[Insert Backend URL]`
+- **Frontend:** `https://odoo-hackathon-mu-eight.vercel.app/`
+- **Backend API:** `https://odoo-hackathon-83vq.onrender.com/`
 
 ---
 

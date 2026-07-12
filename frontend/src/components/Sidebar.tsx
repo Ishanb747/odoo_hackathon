@@ -1,5 +1,6 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
+import Logo from './Logo'
 
 // ── Nav items — exact order from mockup (Section 2 of readme) ──
 const NAV_ITEMS = [
@@ -42,42 +43,7 @@ const Sidebar: React.FC = () => {
           gap: 'var(--space-3)',
         }}
       >
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: 'var(--radius-md)',
-            background: 'linear-gradient(135deg, var(--color-primary), #a89cff)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            boxShadow: '0 2px 8px rgba(108,99,255,0.4)',
-          }}
-        >
-          <span
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontWeight: 700,
-              fontSize: '0.75rem',
-              color: 'white',
-              letterSpacing: '-0.01em',
-            }}
-          >
-            AF
-          </span>
-        </div>
-        <span
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontWeight: 600,
-            fontSize: 'var(--text-lg)',
-            color: 'white',
-            letterSpacing: '-0.02em',
-          }}
-        >
-          AssetFlow
-        </span>
+        <Logo size={26} textColor="white" />
       </div>
 
       {/* ── Nav items ── */}

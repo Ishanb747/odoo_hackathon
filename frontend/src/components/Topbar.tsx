@@ -1,6 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import Logo from './Logo'
 
 interface TopbarProps {
   title?: string
@@ -36,17 +37,7 @@ const Topbar: React.FC<TopbarProps> = ({ title = '' }) => {
     >
       {/* Left: AssetFlow wordmark + page title */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-        <span
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontWeight: 700,
-            fontSize: 'var(--text-lg)',
-            color: 'var(--color-primary)',
-            letterSpacing: '-0.02em',
-          }}
-        >
-          AssetFlow
-        </span>
+        <Logo size={24} />
         {title && (
           <>
             <span style={{ color: 'var(--color-border-strong)', fontSize: 'var(--text-base)', userSelect: 'none' }}>›</span>
