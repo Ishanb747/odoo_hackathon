@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
-const API_BASE = import.meta.env.VITE_API_URL ?? ''
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 
 export interface BookingResponse {
   id: number
@@ -35,7 +35,7 @@ export interface BookingError {
 
 // Helper to get auth token
 const getHeaders = () => {
-  const token = localStorage.getItem('token')
+  const token = localStorage.getItem('af_token')
   return {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -46,7 +46,7 @@ export const useGetResources = () => {
   return useQuery<string[]>({
     queryKey: ['bookable_resources'],
     queryFn: async () => {
-      const url = new URL(`${API_BASE}/api/bookings/resources`)
+      const url = new URL(`${API_BASE}/bookings/resources`)
       const res = await fetch(url.toString(), {
         headers: getHeaders(),
       })
@@ -62,7 +62,7 @@ export const useGetBookings = (resource_name: string, date: string) => {
     queryFn: async () => {
       if (!resource_name || !date) return []
       
-      const url = new URL(`${API_BASE}/api/bookings`)
+      const url = new URL(`${API_BASE}/bookings`)
       url.searchParams.append('resource_name', resource_name)
       url.searchParams.append('booking_date', date)
       
@@ -84,7 +84,7 @@ export const useCreateBooking = () => {
   
   return useMutation<BookingResponse, BookingError, BookingCreate>({
     mutationFn: async (data: BookingCreate) => {
-      const res = await fetch(`${API_BASE}/api/bookings`, {
+      const res = await fetch(`${API_BASE}/bookings`, {
         method: 'POST',
         headers: getHeaders(),
         body: JSON.stringify(data),
