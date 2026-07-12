@@ -19,19 +19,25 @@ app = FastAPI(
     version="0.1.0",
 )
 
-def _local_dev_origins() -> list[str]:
+def _get_allowed_origins() -> list[str]:
+    # Local dev ports
     ports = {settings.FRONTEND_PORT, 3000, 5173}
     origins: list[str] = []
     for port in sorted(ports):
         origins.append(f"http://localhost:{port}")
         origins.append(f"http://127.0.0.1:{port}")
+    
+    # Production origins
+    if settings.ALLOWED_ORIGINS:
+        origins.extend([o.strip() for o in settings.ALLOWED_ORIGINS.split(",") if o.strip()])
+        
     return origins
 
 
 # ── CORS — local frontend origins used during dev ────────────────
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_local_dev_origins(),
+    allow_origins=_get_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

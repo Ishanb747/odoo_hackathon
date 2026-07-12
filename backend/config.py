@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     BACKEND_PORT: int = 8000
     # Port the Vite dev server runs on (used to build CORS allow_origins).
     FRONTEND_PORT: int = 5173
+    ALLOWED_ORIGINS: str = "" # Comma-separated list of production origins (e.g., https://my-app.vercel.app)
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
