@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import Dex from '../components/Dex'
+import Logo from '../components/Logo'
 import '../styles/landing.css'
 
 // ── Feature data ─────────────────────────────────────────────
@@ -54,68 +54,102 @@ const MARQUEE_ITEMS = [
   '✦ Role Management',
 ]
 
-// ── Mini floating asset tag ───────────────────────────────────
-const FloatingTag: React.FC<{
-  text: string
-  style?: React.CSSProperties
-  animClass?: string
-}> = ({ text, style, animClass = '' }) => (
-  <div
-    className={animClass}
-    style={{
-      position: 'absolute',
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: 6,
-      backgroundColor: 'white',
-      border: '1.5px solid var(--color-border)',
-      borderRadius: 'var(--radius-full)',
-      padding: '6px 14px',
-      boxShadow: 'var(--shadow-md)',
-      fontFamily: 'var(--font-mono)',
-      fontSize: 'var(--text-xs)',
-      fontWeight: 600,
-      color: 'var(--color-ink)',
-      whiteSpace: 'nowrap',
-      ...style,
-    }}
-  >
-    <span
+// ── Clean UI Mockup ──────────────────────────────────────────
+const CleanMockup: React.FC = () => {
+  return (
+    <div 
+      className="land-fade-up delay-300"
       style={{
-        width: 7,
-        height: 7,
-        borderRadius: '50%',
-        backgroundColor: 'var(--color-success)',
-        display: 'inline-block',
-        flexShrink: 0,
+        position: 'relative',
+        width: '100%',
+        maxWidth: 520,
+        height: 400,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
-    />
-    {text}
-  </div>
-)
+    >
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        animation: 'floatMockup 6s ease-in-out infinite',
+      }}>
+        {/* Main Base Panel */}
+        <div style={{
+          position: 'absolute',
+          top: '10%',
+          left: '5%',
+          width: '90%',
+          height: '80%',
+          backgroundColor: 'var(--color-surface)',
+          border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-xl)',
+          boxShadow: 'var(--shadow-lg)',
+          display: 'flex',
+          flexDirection: 'column',
+          padding: 'var(--space-6)',
+          gap: 'var(--space-4)',
+        }}>
+          {/* Header Mockup */}
+          <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center', borderBottom: '1px solid var(--color-border)', paddingBottom: 'var(--space-3)' }}>
+            <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', backgroundColor: 'var(--color-primary-light)' }} />
+            <div style={{ width: 140, height: 12, borderRadius: 'var(--radius-sm)', backgroundColor: 'var(--color-border)' }} />
+          </div>
+          {/* Content Mockup */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
+            <div style={{ height: 100, borderRadius: 'var(--radius-md)', backgroundColor: 'var(--color-canvas)', border: '1px solid var(--color-border)' }} />
+            <div style={{ height: 100, borderRadius: 'var(--radius-md)', backgroundColor: 'var(--color-canvas)', border: '1px solid var(--color-border)' }} />
+          </div>
+          <div style={{ flex: 1, borderRadius: 'var(--radius-md)', backgroundColor: 'var(--color-canvas)', border: '1px solid var(--color-border)' }} />
+        </div>
 
-// ── Blob background element ───────────────────────────────────
-const Blob: React.FC<{
-  color: string
-  size: number
-  style?: React.CSSProperties
-  animClass?: string
-}> = ({ color, size, style, animClass }) => (
-  <div
-    className={animClass}
-    style={{
-      position: 'absolute',
-      width: size,
-      height: size,
-      borderRadius: '50%',
-      background: color,
-      filter: 'blur(80px)',
-      opacity: 0.35,
-      pointerEvents: 'none',
-      ...style,
-    }}
-  />
-)
+        {/* Floating Card 1 */}
+        <div style={{
+          position: 'absolute',
+          top: '0%',
+          right: '-2%',
+          width: 180,
+          backgroundColor: 'var(--color-surface)',
+          border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-md)',
+          boxShadow: 'var(--shadow-md)',
+          display: 'flex',
+          flexDirection: 'column',
+          padding: 'var(--space-4)',
+          gap: 'var(--space-2)'
+        }}>
+          <div style={{ width: 80, height: 10, borderRadius: 'var(--radius-sm)', backgroundColor: 'var(--color-primary)' }} />
+          <div style={{ width: '100%', height: 40, backgroundColor: 'var(--color-success-light)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-success)' }} />
+        </div>
+
+        {/* Floating Card 2 */}
+        <div style={{
+          position: 'absolute',
+          bottom: '5%',
+          left: '-5%',
+          width: 220,
+          backgroundColor: 'var(--color-surface)',
+          border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-md)',
+          boxShadow: 'var(--shadow-md)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 'var(--space-3)',
+          padding: 'var(--space-3)',
+        }}>
+          <div style={{ width: 32, height: 32, borderRadius: 'var(--radius-full)', backgroundColor: 'var(--color-warning-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: 12, height: 12, borderRadius: 'var(--radius-full)', backgroundColor: 'var(--color-warning)' }} />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-1)' }}>
+            <div style={{ width: 100, height: 8, borderRadius: 'var(--radius-sm)', backgroundColor: 'var(--color-border-strong)' }} />
+            <div style={{ width: 60, height: 6, borderRadius: 'var(--radius-sm)', backgroundColor: 'var(--color-border)' }} />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 // ── Main component ────────────────────────────────────────────
 const LandingPage: React.FC = () => {
@@ -163,47 +197,14 @@ const LandingPage: React.FC = () => {
           right: 0,
           zIndex: 200,
           padding: '0 var(--space-8)',
-          height: 68,
+          height: 'var(--topbar-height)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: 'transparent',
+          backgroundColor: scrolled ? 'var(--color-surface)' : 'transparent',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div
-            style={{
-              width: 34,
-              height: 34,
-              borderRadius: 10,
-              backgroundColor: 'var(--color-primary)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <span
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontWeight: 700,
-                fontSize: 13,
-                color: 'white',
-              }}
-            >
-              AF
-            </span>
-          </div>
-          <span
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontWeight: 600,
-              fontSize: 'var(--text-xl)',
-              color: 'var(--color-ink)',
-            }}
-          >
-            AssetFlow
-          </span>
-        </div>
+        <Logo size={24} textColor="var(--color-ink)" />
 
         <Link
           to="/login"
@@ -217,14 +218,14 @@ const LandingPage: React.FC = () => {
             border: '1.5px solid var(--color-primary)',
             borderRadius: 'var(--radius-full)',
             transition: 'all var(--transition-fast)',
-            backgroundColor: 'rgba(108,99,255,0.06)',
+            backgroundColor: 'transparent',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = 'var(--color-primary)'
             e.currentTarget.style.color = 'white'
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(108,99,255,0.06)'
+            e.currentTarget.style.backgroundColor = 'transparent'
             e.currentTarget.style.color = 'var(--color-primary)'
           }}
         >
@@ -233,7 +234,7 @@ const LandingPage: React.FC = () => {
       </nav>
 
       {/* ══════════════════════════════════════════════════
-          HERO
+          HERO (Clean, Token-Aligned)
       ══════════════════════════════════════════════════ */}
       <section
         style={{
@@ -242,38 +243,17 @@ const LandingPage: React.FC = () => {
           display: 'flex',
           alignItems: 'center',
           overflow: 'hidden',
-          paddingTop: 68,
+          paddingTop: 'var(--topbar-height)',
         }}
       >
-        {/* Background blobs */}
-        <Blob
-          color="var(--color-primary)"
-          size={500}
-          style={{ top: -100, left: -100 }}
-          animClass="blobOne"
-          // inline style for the blob animation since we can't use className for custom keyframes
-        />
-        <Blob
-          color="var(--color-accent)"
-          size={400}
-          style={{ bottom: -80, right: -80 }}
-          animClass="blobTwo"
-        />
-        <Blob
-          color="var(--color-success)"
-          size={300}
-          style={{ top: '30%', right: '20%' }}
-          animClass="blobThree"
-        />
-
-        {/* Dot grid overlay */}
+        {/* Subtle grid background */}
         <div
           style={{
             position: 'absolute',
             inset: 0,
-            backgroundImage:
-              'radial-gradient(circle, rgba(34,31,46,0.06) 1.5px, transparent 1.5px)',
-            backgroundSize: '32px 32px',
+            backgroundImage: 'radial-gradient(circle, var(--color-border-strong) 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
+            opacity: 0.4,
             pointerEvents: 'none',
           }}
         />
@@ -301,25 +281,24 @@ const LandingPage: React.FC = () => {
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: 8,
-                  backgroundColor: 'var(--color-primary-light)',
-                  color: 'var(--color-primary)',
-                  border: '1.5px solid rgba(108,99,255,0.3)',
+                  gap: 'var(--space-2)',
+                  backgroundColor: 'var(--color-surface)',
+                  color: 'var(--color-ink-soft)',
+                  border: '1px solid var(--color-border)',
                   borderRadius: 'var(--radius-full)',
                   padding: '6px 16px',
                   fontSize: 'var(--text-sm)',
                   fontWeight: 600,
-                  letterSpacing: '0.01em',
+                  boxShadow: 'var(--shadow-sm)',
                 }}
               >
                 <span
                   style={{
                     width: 8,
                     height: 8,
-                    borderRadius: '50%',
+                    borderRadius: 'var(--radius-full)',
                     backgroundColor: 'var(--color-primary)',
                     display: 'inline-block',
-                    animation: 'pulse 2s ease-in-out infinite',
                   }}
                 />
                 Enterprise Asset Management
@@ -333,17 +312,14 @@ const LandingPage: React.FC = () => {
                   fontFamily: 'var(--font-display)',
                   fontWeight: 700,
                   fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-                  lineHeight: 1.1,
-                  letterSpacing: '-0.03em',
+                  lineHeight: 1.15,
+                  letterSpacing: '-0.02em',
                   color: 'var(--color-ink)',
                   margin: 0,
                 }}
               >
-                Know where{' '}
-                <span className="gradient-heading">everything</span>
-                {' '}is —
-                <br />
-                <span style={{ color: 'var(--color-ink)' }}>instantly.</span>
+                Track your assets{' '}
+                <span style={{ color: 'var(--color-primary)' }}>intelligently.</span>
               </h1>
             </div>
 
@@ -352,15 +328,13 @@ const LandingPage: React.FC = () => {
               <p
                 style={{
                   fontSize: 'var(--text-lg)',
-                  color: 'var(--color-neutral-dark)',
-                  lineHeight: 1.7,
-                  maxWidth: 460,
+                  color: 'var(--color-muted)',
+                  lineHeight: 1.6,
+                  maxWidth: 480,
                   margin: 0,
                 }}
               >
-                AssetFlow replaces spreadsheets and paper logs with one system of
-                record — track assets, book shared resources, approve maintenance,
-                and run audits.
+                AssetFlow replaces spreadsheets with one system of record. Track assets, book resources, manage maintenance, and run audits securely.
               </p>
             </div>
 
@@ -368,26 +342,26 @@ const LandingPage: React.FC = () => {
             <div className="land-fade-up delay-400" style={{ display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap' }}>
               <Link to="/login" style={{ textDecoration: 'none' }}>
                 <button
-                  className="cta-pulse"
                   style={{
                     padding: '14px 32px',
-                    borderRadius: 'var(--radius-card)',
-                    border: 'none',
-                    backgroundColor: 'var(--color-accent)',
-                    color: 'var(--color-ink)',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid transparent',
+                    backgroundColor: 'var(--color-primary)',
+                    color: 'var(--color-surface)',
                     fontFamily: 'var(--font-body)',
-                    fontWeight: 700,
+                    fontWeight: 600,
                     fontSize: 'var(--text-base)',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 8,
-                    boxShadow: '0 4px 20px rgba(255,184,76,0.4)',
+                    gap: 'var(--space-2)',
+                    boxShadow: 'var(--shadow-sm)',
+                    transition: 'all var(--transition-fast)',
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--color-accent-dark)' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--color-accent)' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--color-primary-dark)' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--color-primary)' }}
                 >
-                  Get started free
+                  Get started
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
@@ -397,15 +371,16 @@ const LandingPage: React.FC = () => {
                 <button
                   style={{
                     padding: '14px 28px',
-                    borderRadius: 'var(--radius-card)',
-                    border: '1.5px solid var(--color-border)',
-                    backgroundColor: 'white',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--color-border)',
+                    backgroundColor: 'var(--color-surface)',
                     color: 'var(--color-ink)',
                     fontFamily: 'var(--font-body)',
                     fontWeight: 600,
                     fontSize: 'var(--text-base)',
                     cursor: 'pointer',
                     transition: 'all var(--transition-fast)',
+                    boxShadow: 'var(--shadow-xs)',
                   }}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.color = 'var(--color-primary)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.color = 'var(--color-ink)' }}
@@ -414,105 +389,15 @@ const LandingPage: React.FC = () => {
                 </button>
               </Link>
             </div>
-
-            {/* Trust line */}
-            <div className="land-fade-up delay-500">
-              <p
-                style={{
-                  fontSize: 'var(--text-sm)',
-                  color: 'var(--color-neutral)',
-                  margin: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                }}
-              >
-                <span style={{ display: 'flex', gap: 4 }}>
-                  {['🏢','🔧','📦','🚗'].map((e, i) => (
-                    <span key={i} style={{ fontSize: 16 }}>{e}</span>
-                  ))}
-                </span>
-                Built for teams with equipment, rooms, or vehicles to track
-              </p>
-            </div>
           </div>
 
-          {/* Right: Dex + floating tags */}
-          <div
-            className="land-slide-right delay-300"
-            style={{
-              position: 'relative',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minHeight: 420,
-            }}
-          >
-            {/* Glow circle behind Dex */}
-            <div
-              style={{
-                position: 'absolute',
-                width: 340,
-                height: 340,
-                borderRadius: '50%',
-                background: 'radial-gradient(circle, rgba(108,99,255,0.12) 0%, transparent 70%)',
-                pointerEvents: 'none',
-              }}
-            />
-
-            {/* Dex mascot */}
-            <div style={{ animation: 'floatDex 4s ease-in-out infinite', zIndex: 2 }}>
-              <Dex size={220} />
-            </div>
-
-            {/* Floating asset tags */}
-            <FloatingTag
-              text="AF-0114 — Available"
-              animClass=""
-              style={{
-                top: '8%',
-                right: '5%',
-                animation: 'tagFloat 3.5s ease-in-out infinite',
-                animationDelay: '0.2s',
-              }}
-            />
-            <FloatingTag
-              text="Room B2 — Booked"
-              animClass=""
-              style={{
-                top: '35%',
-                left: '2%',
-                animation: 'tagFloat2 4s ease-in-out infinite',
-                animationDelay: '0.8s',
-                borderColor: 'rgba(70,195,143,0.4)',
-              }}
-            />
-            <FloatingTag
-              text="Maintenance — Resolved"
-              animClass=""
-              style={{
-                bottom: '20%',
-                right: '3%',
-                animation: 'tagFloat3 3.8s ease-in-out infinite',
-                animationDelay: '0.5s',
-                borderColor: 'rgba(255,107,107,0.3)',
-              }}
-            />
-            <FloatingTag
-              text="AF-0087 — Audit OK"
-              animClass=""
-              style={{
-                bottom: '10%',
-                left: '8%',
-                animation: 'tagFloat 4.2s ease-in-out infinite',
-                animationDelay: '1.1s',
-                borderColor: 'rgba(232,163,61,0.4)',
-              }}
-            />
+          {/* Right: Clean Mockup */}
+          <div className="land-slide-right delay-300" style={{ display: 'flex', justifyContent: 'center' }}>
+             <CleanMockup />
           </div>
         </div>
 
-        {/* Bottom fade */}
+        {/* Bottom fade into features bg */}
         <div
           style={{
             position: 'absolute',
@@ -520,7 +405,7 @@ const LandingPage: React.FC = () => {
             left: 0,
             right: 0,
             height: 120,
-            background: 'linear-gradient(to bottom, transparent, var(--color-canvas))',
+            background: 'linear-gradient(to bottom, transparent, var(--color-surface))',
             pointerEvents: 'none',
           }}
         />
@@ -531,8 +416,9 @@ const LandingPage: React.FC = () => {
       ══════════════════════════════════════════════════ */}
       <div
         style={{
-          backgroundColor: 'var(--color-ink)',
-          padding: '18px 0',
+          backgroundColor: 'var(--color-surface)',
+          padding: 'var(--space-6) 0',
+          borderBottom: '1px solid var(--color-border)',
           overflow: 'hidden',
           position: 'relative',
         }}
@@ -544,14 +430,15 @@ const LandingPage: React.FC = () => {
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: 32,
-                fontFamily: 'var(--font-body)',
+                gap: 'var(--space-10)',
+                fontFamily: 'var(--font-mono)',
                 fontWeight: 600,
-                fontSize: 'var(--text-sm)',
-                color: 'rgba(255,255,255,0.75)',
-                padding: '0 32px',
+                fontSize: 'var(--text-xs)',
+                color: 'var(--color-muted)',
+                padding: '0 var(--space-10)',
                 whiteSpace: 'nowrap',
-                letterSpacing: '0.04em',
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
               }}
             >
               {item}
@@ -568,6 +455,7 @@ const LandingPage: React.FC = () => {
           maxWidth: 1200,
           margin: '0 auto',
           padding: 'var(--space-16) var(--space-8)',
+          backgroundColor: 'var(--color-surface)',
         }}
       >
         {/* Section header */}
@@ -586,36 +474,35 @@ const LandingPage: React.FC = () => {
               textTransform: 'uppercase',
               marginBottom: 'var(--space-4)',
               backgroundColor: 'var(--color-primary-light)',
-              padding: '4px 12px',
+              padding: '6px 16px',
               borderRadius: 'var(--radius-full)',
             }}
           >
-            What it does
+            Capabilities
           </span>
           <h2
             style={{
               fontFamily: 'var(--font-display)',
               fontWeight: 700,
-              fontSize: 'clamp(1.8rem, 3.5vw, 2.75rem)',
+              fontSize: 'clamp(2rem, 3.5vw, 3rem)',
               letterSpacing: '-0.02em',
               color: 'var(--color-ink)',
               margin: '0 0 var(--space-4)',
               lineHeight: 1.2,
             }}
           >
-            Everything your team needs,{' '}
-            <span style={{ color: 'var(--color-primary)' }}>nothing it doesn't.</span>
+            A unified system of record
           </h2>
           <p
             style={{
               fontSize: 'var(--text-lg)',
-              color: 'var(--color-neutral-dark)',
-              maxWidth: 520,
+              color: 'var(--color-muted)',
+              maxWidth: 560,
               margin: '0 auto',
-              lineHeight: 1.7,
+              lineHeight: 1.6,
             }}
           >
-            Four core workflows. One system. No more spreadsheets.
+            Four core workflows designed specifically for modern asset management. Completely extensible and robust.
           </p>
         </div>
 
@@ -632,43 +519,28 @@ const LandingPage: React.FC = () => {
               key={f.id}
               className={`feature-card reveal delay-${i + 1}`}
               style={{
-                backgroundColor: 'var(--color-surface)',
+                backgroundColor: 'var(--color-canvas)',
                 border: '1px solid var(--color-border)',
                 borderRadius: 'var(--radius-card)',
-                padding: 'var(--space-8)',
-                boxShadow: 'var(--shadow-sm)',
+                padding: 'var(--space-6)',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 'var(--space-4)',
                 position: 'relative',
-                overflow: 'hidden',
               }}
             >
-              {/* Top accent bar */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: 4,
-                  backgroundColor: f.accent,
-                  borderRadius: 'var(--radius-card) var(--radius-card) 0 0',
-                }}
-              />
-
               {/* Icon */}
               <div
                 style={{
-                  width: 52,
-                  height: 52,
+                  width: 48,
+                  height: 48,
                   borderRadius: 'var(--radius-md)',
                   backgroundColor: f.bg,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: 26,
-                  marginTop: 8,
+                  fontSize: 24,
+                  border: `1px solid ${f.accent}20`
                 }}
               >
                 {f.emoji}
@@ -680,18 +552,19 @@ const LandingPage: React.FC = () => {
                   style={{
                     fontFamily: 'var(--font-display)',
                     fontWeight: 600,
-                    fontSize: 'var(--text-xl)',
+                    fontSize: 'var(--text-lg)',
                     color: 'var(--color-ink)',
                     margin: '0 0 var(--space-2)',
+                    letterSpacing: '-0.01em',
                   }}
                 >
                   {f.title}
                 </h3>
                 <p
                   style={{
-                    fontSize: 'var(--text-base)',
-                    color: 'var(--color-neutral-dark)',
-                    lineHeight: 1.65,
+                    fontSize: 'var(--text-sm)',
+                    color: 'var(--color-ink-soft)',
+                    lineHeight: 1.5,
                     margin: 0,
                   }}
                 >
@@ -700,19 +573,20 @@ const LandingPage: React.FC = () => {
               </div>
 
               {/* Asset tag chip */}
-              <div style={{ marginTop: 'auto', paddingTop: 'var(--space-2)' }}>
+              <div style={{ marginTop: 'auto', paddingTop: 'var(--space-4)' }}>
                 <span
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: 6,
                     fontFamily: 'var(--font-mono)',
-                    fontSize: 'var(--text-xs)',
+                    fontSize: '11px',
                     color: f.accent,
                     backgroundColor: f.bg,
-                    padding: '3px 10px',
+                    padding: '4px 12px',
                     borderRadius: 'var(--radius-full)',
                     fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.04em',
                   }}
                 >
                   {f.tag}
@@ -723,8 +597,6 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-
-
       {/* ══════════════════════════════════════════════════
           FINAL CTA
       ══════════════════════════════════════════════════ */}
@@ -732,172 +604,63 @@ const LandingPage: React.FC = () => {
         style={{
           position: 'relative',
           padding: 'var(--space-16) var(--space-8)',
-          overflow: 'hidden',
-          background: 'linear-gradient(135deg, #1a1830 0%, #221F2E 60%, #2d1f3d 100%)',
+          backgroundColor: 'var(--color-surface)',
+          borderTop: '1px solid var(--color-border)',
         }}
       >
-        {/* Background blobs for CTA */}
-        <div
-          style={{
-            position: 'absolute',
-            width: 400,
-            height: 400,
-            borderRadius: '50%',
-            background: 'var(--color-primary)',
-            filter: 'blur(120px)',
-            opacity: 0.15,
-            top: -100,
-            right: -100,
-            pointerEvents: 'none',
-            animation: 'blobOne 10s ease-in-out infinite',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            width: 300,
-            height: 300,
-            borderRadius: '50%',
-            background: 'var(--color-accent)',
-            filter: 'blur(100px)',
-            opacity: 0.12,
-            bottom: -80,
-            left: -80,
-            pointerEvents: 'none',
-            animation: 'blobTwo 12s ease-in-out infinite',
-          }}
-        />
-
         <div
           style={{
             maxWidth: 680,
             margin: '0 auto',
             textAlign: 'center',
-            position: 'relative',
-            zIndex: 1,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             gap: 'var(--space-6)',
           }}
         >
-          <div className="reveal">
-            <Dex size={90} />
+          <div>
+             <Logo size={40} textColor="var(--color-ink)" hideText />
           </div>
 
-          <div className="reveal delay-1">
+          <div>
             <h2
               style={{
                 fontFamily: 'var(--font-display)',
                 fontWeight: 700,
                 fontSize: 'clamp(2rem, 4vw, 3rem)',
-                color: 'white',
+                color: 'var(--color-ink)',
                 margin: 0,
                 letterSpacing: '-0.02em',
                 lineHeight: 1.15,
               }}
             >
-              Ready to get organized?
+              Start managing assets<br/>professionally.
             </h2>
           </div>
 
-          <div className="reveal delay-2">
-            <p
-              style={{
-                fontSize: 'var(--text-lg)',
-                color: 'rgba(255,255,255,0.65)',
-                maxWidth: 480,
-                lineHeight: 1.7,
-                margin: 0,
-              }}
-            >
-              Sign up and have your first asset registered in under two minutes.
-              No spreadsheets. No paper logs.
-            </p>
-          </div>
-
-          <div className="reveal delay-3" style={{ display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <div>
             <Link to="/login" style={{ textDecoration: 'none' }}>
               <button
                 style={{
                   padding: '16px 40px',
-                  borderRadius: 'var(--radius-card)',
-                  border: 'none',
-                  backgroundColor: 'var(--color-accent)',
-                  color: 'var(--color-ink)',
-                  fontFamily: 'var(--font-body)',
-                  fontWeight: 700,
-                  fontSize: 'var(--text-lg)',
-                  cursor: 'pointer',
-                  boxShadow: '0 6px 30px rgba(255,184,76,0.45)',
-                  transition: 'all var(--transition-base)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--color-accent-dark)'
-                  e.currentTarget.style.transform = 'translateY(-2px)'
-                  e.currentTarget.style.boxShadow = '0 10px 40px rgba(255,184,76,0.55)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--color-accent)'
-                  e.currentTarget.style.transform = 'translateY(0)'
-                  e.currentTarget.style.boxShadow = '0 6px 30px rgba(255,184,76,0.45)'
-                }}
-              >
-                Get started free
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <path d="M3 9h12M11 5l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-            </Link>
-            <Link to="/login" style={{ textDecoration: 'none' }}>
-              <button
-                style={{
-                  padding: '16px 32px',
-                  borderRadius: 'var(--radius-card)',
-                  border: '1.5px solid rgba(255,255,255,0.25)',
-                  backgroundColor: 'transparent',
-                  color: 'rgba(255,255,255,0.85)',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid transparent',
+                  backgroundColor: 'var(--color-primary)',
+                  color: 'var(--color-surface)',
                   fontFamily: 'var(--font-body)',
                   fontWeight: 600,
                   fontSize: 'var(--text-lg)',
                   cursor: 'pointer',
+                  boxShadow: 'var(--shadow-md)',
                   transition: 'all var(--transition-fast)',
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.6)'
-                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--color-primary-dark)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--color-primary)' }}
               >
-                Log in →
+                Create workspace
               </button>
             </Link>
-          </div>
-
-          {/* Tiny asset tags row */}
-          <div className="reveal delay-4" style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap', justifyContent: 'center' }}>
-            {['AF-0114', 'Room B2', 'AF-0062', 'AF-0087'].map((tag) => (
-              <span
-                key={tag}
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 11,
-                  color: 'rgba(255,255,255,0.4)',
-                  backgroundColor: 'rgba(255,255,255,0.07)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  padding: '4px 10px',
-                  borderRadius: 'var(--radius-full)',
-                }}
-              >
-                {tag}
-              </span>
-            ))}
           </div>
         </div>
       </section>
@@ -907,49 +670,55 @@ const LandingPage: React.FC = () => {
       ══════════════════════════════════════════════════ */}
       <footer
         style={{
-          backgroundColor: 'var(--color-ink)',
+          backgroundColor: 'var(--color-surface)',
+          borderTop: '1px solid var(--color-border)',
           padding: 'var(--space-8) var(--space-8)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: 'var(--space-4)',
+          marginTop: 'auto',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: 8,
-              backgroundColor: 'var(--color-primary)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 11, color: 'white' }}>AF</span>
-          </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 'var(--text-lg)', color: 'white' }}>
-            AssetFlow
-          </span>
-        </div>
-
-        <Link
-          to="/login"
+        <div
           style={{
-            fontFamily: 'var(--font-body)',
-            fontWeight: 500,
-            fontSize: 'var(--text-sm)',
-            color: 'rgba(255,255,255,0.5)',
-            textDecoration: 'none',
-            transition: 'color var(--transition-fast)',
+            maxWidth: 1200,
+            margin: '0 auto',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 'var(--space-6)',
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.9)' }}
-          onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)' }}
         >
-          Log in
-        </Link>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-4)' }}>
+            <Logo size={20} textColor="var(--color-ink)" />
+            <div style={{ display: 'flex', gap: 'var(--space-6)' }}>
+              {['Features', 'Pricing', 'Documentation', 'Contact'].map(link => (
+                <a
+                  key={link}
+                  href="#"
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 'var(--text-sm)',
+                    fontWeight: 500,
+                    color: 'var(--color-muted)',
+                    textDecoration: 'none',
+                    transition: 'color var(--transition-fast)',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-ink)' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-muted)' }}
+                >
+                  {link}
+                </a>
+              ))}
+            </div>
+          </div>
+          
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-4)', borderTop: '1px solid var(--color-border)', paddingTop: 'var(--space-4)' }}>
+            <p style={{ margin: 0, fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', color: 'var(--color-muted)' }}>
+              © {new Date().getFullYear()} AssetFlow. All rights reserved.
+            </p>
+            <div style={{ display: 'flex', gap: 'var(--space-4)' }}>
+              <a href="#" style={{ color: 'var(--color-muted)', textDecoration: 'none', fontSize: 'var(--text-xs)' }}>Privacy Policy</a>
+              <a href="#" style={{ color: 'var(--color-muted)', textDecoration: 'none', fontSize: 'var(--text-xs)' }}>Terms of Service</a>
+            </div>
+          </div>
+        </div>
       </footer>
     </div>
   )
