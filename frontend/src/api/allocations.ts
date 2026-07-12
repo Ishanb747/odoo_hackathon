@@ -85,6 +85,7 @@ export const useReturnAllocation = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['allocations'] })
       queryClient.invalidateQueries({ queryKey: ['assets'] })
+      queryClient.invalidateQueries({ queryKey: ['maintenance'] })
     }
   })
 }

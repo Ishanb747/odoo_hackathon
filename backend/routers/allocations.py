@@ -118,6 +118,8 @@ def return_allocation(
     current_user: Employee = Depends(get_current_user)
 ):
     """Return an allocated asset."""
+    from models.maintenance import MaintenanceRequest, MaintenanceStatus
+    
     alloc = db.query(Allocation).filter(Allocation.id == alloc_id).first()
     if not alloc:
         raise HTTPException(status_code=404, detail="Allocation not found")
@@ -136,6 +138,16 @@ def return_allocation(
     # Update asset status
     if body.needs_maintenance:
         asset.status = AssetStatus.maintenance
+        
+        # Auto-create maintenance request
+        new_maintenance = MaintenanceRequest(
+            asset_id=asset.id,
+            reported_by=current_user.id,
+            issue_description=f"Auto-flagged during return. Condition reported: {body.condition_on_return}",
+            status=MaintenanceStatus.pending,
+            created_at=datetime.now(timezone.utc)
+        )
+        db.add(new_maintenance)
     else:
         asset.status = AssetStatus.available
 
