@@ -1,6 +1,6 @@
 import React from 'react'
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'accent'
 type ButtonSize = 'sm' | 'md' | 'lg'
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -12,43 +12,60 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<ButtonVariant, React.CSSProperties> = {
   primary: {
-    backgroundColor: 'var(--color-accent)',
-    color: 'var(--color-ink)',
-    border: '2px solid transparent',
-    fontWeight: 700,
+    backgroundColor: 'var(--color-primary)',
+    color: '#ffffff',
+    border: '1.5px solid var(--color-primary)',
+    fontWeight: 600,
+    letterSpacing: '-0.01em',
   },
   secondary: {
     backgroundColor: 'transparent',
     color: 'var(--color-primary)',
-    border: '2px solid var(--color-primary)',
+    border: '1.5px solid var(--color-primary)',
     fontWeight: 600,
+    letterSpacing: '-0.01em',
   },
   ghost: {
     backgroundColor: 'transparent',
-    color: 'var(--color-ink)',
-    border: '2px solid transparent',
+    color: 'var(--color-ink-soft)',
+    border: '1.5px solid transparent',
     fontWeight: 500,
   },
   danger: {
     backgroundColor: 'var(--color-danger-light)',
     color: 'var(--color-danger-dark)',
-    border: '2px solid var(--color-danger)',
+    border: '1.5px solid var(--color-danger)',
     fontWeight: 600,
+  },
+  accent: {
+    backgroundColor: 'var(--color-accent)',
+    color: 'var(--color-ink)',
+    border: '1.5px solid transparent',
+    fontWeight: 700,
   },
 }
 
+const variantHover: Record<ButtonVariant, Partial<React.CSSProperties>> = {
+  primary: { backgroundColor: 'var(--color-primary-dark)', borderColor: 'var(--color-primary-dark)' },
+  secondary: { backgroundColor: 'var(--color-primary-hover)' },
+  ghost: { backgroundColor: 'var(--color-muted-light)', color: 'var(--color-ink)' },
+  danger: { backgroundColor: '#ffe0e0', borderColor: 'var(--color-danger-dark)' },
+  accent: { backgroundColor: 'var(--color-accent-dark)', color: '#fff' },
+}
+
 const sizeStyles: Record<ButtonSize, React.CSSProperties> = {
-  sm: { padding: '6px 14px', fontSize: 'var(--text-sm)', borderRadius: 'var(--radius-md)' },
-  md: { padding: '10px 20px', fontSize: 'var(--text-base)', borderRadius: 'var(--radius-md)' },
-  lg: { padding: '14px 28px', fontSize: 'var(--text-lg)', borderRadius: 'var(--radius-card)' },
+  sm: { padding: '5px 12px', fontSize: 'var(--text-sm)', borderRadius: 'var(--radius-md)', gap: '5px' },
+  md: { padding: '8px 16px', fontSize: 'var(--text-sm)', borderRadius: 'var(--radius-md)', gap: '6px' },
+  lg: { padding: '11px 22px', fontSize: 'var(--text-base)', borderRadius: 'var(--radius-md)', gap: '8px' },
 }
 
 /**
- * Button — primary/secondary/ghost/danger variants.
- * primary  → sunshine yellow fill (CTAs)
+ * Button — primary/secondary/ghost/danger/accent variants.
+ * primary  → periwinkle fill (main actions)
  * secondary → periwinkle outline
- * ghost    → text only, no border
+ * ghost    → text-only, subtle hover
  * danger   → coral fill (destructive actions)
+ * accent   → sunshine yellow (marketing CTAs only, e.g. landing page)
  */
 const Button: React.FC<ButtonProps> = ({
   variant = 'primary',
@@ -67,25 +84,30 @@ const Button: React.FC<ButtonProps> = ({
       display: 'inline-flex',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: '8px',
       cursor: disabled || loading ? 'not-allowed' : 'pointer',
-      opacity: disabled || loading ? 0.6 : 1,
+      opacity: disabled || loading ? 0.55 : 1,
       fontFamily: 'var(--font-body)',
       transition: 'all var(--transition-fast)',
       outline: 'none',
-      lineHeight: 1.2,
+      lineHeight: 1.35,
+      whiteSpace: 'nowrap',
+      flexShrink: 0,
       ...style,
     }}
     onMouseEnter={(e) => {
       if (disabled || loading) return
       const el = e.currentTarget
-      if (variant === 'primary') el.style.backgroundColor = 'var(--color-accent-dark)'
-      if (variant === 'secondary') el.style.backgroundColor = 'var(--color-primary-light)'
-      if (variant === 'ghost') el.style.backgroundColor = 'var(--color-neutral-light)'
+      const hv = variantHover[variant]
+      Object.entries(hv).forEach(([k, v]) => {
+        el.style[k as any] = v as string
+      })
     }}
     onMouseLeave={(e) => {
       const el = e.currentTarget
-      el.style.backgroundColor = variantStyles[variant].backgroundColor as string
+      const base = variantStyles[variant]
+      el.style.backgroundColor = (base.backgroundColor as string) ?? ''
+      el.style.borderColor = (base.border?.toString().split(' ')[2]) ?? ''
+      el.style.color = (base.color as string) ?? ''
     }}
     {...rest}
   >
@@ -93,12 +115,13 @@ const Button: React.FC<ButtonProps> = ({
       <>
         <span
           style={{
-            width: 14, height: 14,
+            width: 12, height: 12,
             border: '2px solid currentColor',
             borderTopColor: 'transparent',
             borderRadius: '50%',
             display: 'inline-block',
-            animation: 'spin 0.7s linear infinite',
+            animation: 'spin 0.65s linear infinite',
+            flexShrink: 0,
           }}
         />
         {children}

@@ -5,55 +5,59 @@
 
 :root {
   /* ── Palette ────────────────────────────────────────────── */
-  --color-canvas: #faf6f0;       /* warm paper — page/app background */
-  --color-ink: #221f2e;          /* near-black plum — primary text */
+  --color-canvas: #f6f4f0;       /* warm paper — page/app background */
+  --color-ink: #1a1825;          /* near-black plum — primary text */
+  --color-ink-soft: #3d3a4e;     /* softer heading / label text */
   --color-surface: #ffffff;      /* card / panel background */
-  --color-border: #ece7de;       /* card borders, dividers */
-  --color-surface-muted: #f5f0ea; /* slightly tinted surface for table stripes */
+  --color-surface-raised: #faf9f7; /* subtle raised surface (hover bg, table stripe) */
+  --color-border: #e8e3db;       /* card borders, dividers */
+  --color-border-strong: #ccc7be; /* stronger divider for tables */
 
   /* Primary — Periwinkle */
   --color-primary: #6c63ff;
   --color-primary-light: #eeeeff;
   --color-primary-dark: #4b44cc;
+  --color-primary-hover: rgba(108,99,255,0.08);
 
-  /* Accent — Sunshine */
+  /* Accent — Sunshine (use only for decorative badges, NOT primary buttons) */
   --color-accent: #ffb84c;
   --color-accent-light: #fff4e0;
-  --color-accent-dark: #e09a30;
+  --color-accent-dark: #c07a00;
 
   /* Success — Mint */
   --color-success: #46c38f;
   --color-success-light: #e6f9f2;
-  --color-success-dark: #2e9e72;
+  --color-success-dark: #1f7a51;
 
   /* Danger — Coral */
-  --color-danger: #ff6b6b;
+  --color-danger: #e05050;
   --color-danger-light: #fff0f0;
-  --color-danger-dark: #e04444;
+  --color-danger-dark: #b03030;
 
   /* Warning — Amber */
-  --color-warning: #e8a33d;
+  --color-warning: #d97706;
   --color-warning-light: #fef5e4;
-  --color-warning-dark: #c07c1a;
+  --color-warning-dark: #92400e;
 
   /* Neutral */
-  --color-neutral: #9ca3af;
-  --color-neutral-light: #f3f4f6;
-  --color-neutral-dark: #6b7280;
+  --color-muted: #8b8698;         /* secondary / muted text */
+  --color-muted-light: #f0eef8;   /* muted backgrounds */
+  --color-placeholder: #b5b2c0;
 
   /* ── Typography ─────────────────────────────────────────── */
   --font-display: 'Fredoka', sans-serif;   /* KPI numbers, wordmark */
   --font-body: 'Plus Jakarta Sans', sans-serif;  /* UI, body text */
   --font-mono: 'JetBrains Mono', monospace; /* asset tags: AF-0114 */
 
-  --text-xs: 0.75rem;    /* 12px */
-  --text-sm: 0.875rem;   /* 14px */
-  --text-base: 1rem;     /* 16px */
-  --text-lg: 1.125rem;   /* 18px */
-  --text-xl: 1.25rem;    /* 20px */
-  --text-2xl: 1.5rem;    /* 24px */
-  --text-3xl: 1.875rem;  /* 30px */
-  --text-4xl: 2.25rem;   /* 36px */
+  --text-xs: 0.6875rem;  /* 11px */
+  --text-sm: 0.8125rem;  /* 13px */
+  --text-base: 0.9375rem; /* 15px */
+  --text-md: 1rem;        /* 16px */
+  --text-lg: 1.0625rem;  /* 17px */
+  --text-xl: 1.1875rem;  /* 19px */
+  --text-2xl: 1.375rem;  /* 22px */
+  --text-3xl: 1.75rem;   /* 28px */
+  --text-4xl: 2.125rem;  /* 34px */
 
   /* ── Spacing Scale ──────────────────────────────────────── */
   --space-1: 0.25rem;   /* 4px */
@@ -69,23 +73,24 @@
 
   /* ── Shape ──────────────────────────────────────────────── */
   --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-card: 16px;
-  --radius-xl: 24px;
+  --radius-md: 8px;
+  --radius-card: 12px;
+  --radius-xl: 16px;
   --radius-full: 9999px;
 
   /* ── Shadows ────────────────────────────────────────────── */
-  --shadow-sm: 0 1px 3px rgba(34, 31, 46, 0.07);
-  --shadow-md: 0 4px 12px rgba(34, 31, 46, 0.10);
-  --shadow-lg: 0 8px 32px rgba(34, 31, 46, 0.13);
-  --shadow-card: 0 2px 8px rgba(34, 31, 46, 0.08);
+  --shadow-xs: 0 1px 2px rgba(34, 31, 46, 0.05);
+  --shadow-sm: 0 1px 4px rgba(34, 31, 46, 0.07), 0 1px 2px rgba(34, 31, 46, 0.04);
+  --shadow-md: 0 4px 16px rgba(34, 31, 46, 0.09), 0 1px 4px rgba(34, 31, 46, 0.05);
+  --shadow-lg: 0 12px 40px rgba(34, 31, 46, 0.13), 0 2px 8px rgba(34, 31, 46, 0.06);
+  --shadow-card: 0 1px 3px rgba(34, 31, 46, 0.06), 0 1px 2px rgba(34, 31, 46, 0.04);
 
   /* ── Sidebar ────────────────────────────────────────────── */
-  --sidebar-width: 240px;
-  --topbar-height: 64px;
+  --sidebar-width: 232px;
+  --topbar-height: 60px;
 
   /* ── Transitions ────────────────────────────────────────── */
-  --transition-fast: 120ms ease;
-  --transition-base: 200ms ease;
-  --transition-slow: 350ms ease;
+  --transition-fast: 110ms ease;
+  --transition-base: 180ms ease;
+  --transition-slow: 320ms ease;
 }
