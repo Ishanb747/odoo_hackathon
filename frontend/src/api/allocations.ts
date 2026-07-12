@@ -81,7 +81,17 @@ export const requestTransfer = (body: TransferRequestCreate): Promise<TransferRe
   authFetch('/allocations/transfer', { method: 'POST', body: JSON.stringify(body) })
 
 // ── Compatibility for Phase 4 (Bookings) ─────────────────────────
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+
+export interface AllocationReturn {
+  condition_on_return?: string | null;
+  needs_maintenance?: boolean;
+}
+
+export interface AllocationResponse {
+  status: string;
+  asset_id: number;
+}
 
 export const useGetAllocations = () => {
   return useQuery({
@@ -100,16 +110,10 @@ export const useReturnAllocation = () => {
   const queryClient = useQueryClient()
   return useMutation<AllocationResponse, Error, { id: number; data: AllocationReturn }>({
     mutationFn: async ({ id, data }) => {
-      const res = await fetch(`${API_BASE}/allocations/${id}/return`, {
-        method: 'PATCH',
-        headers: getHeaders(),
+      return authFetch(`/allocations/${id}/return`, {
+        method: 'POST',
         body: JSON.stringify(data),
       })
-      if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.detail || 'Failed to return allocation')
-      }
-      return res.json()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['allocations'] })
