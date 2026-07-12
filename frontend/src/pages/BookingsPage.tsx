@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { format, parse, differenceInMinutes, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isToday, isSameDay } from 'date-fns'
+import { format, parse, differenceInMinutes, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isToday, isSameDay, isWithinInterval, isBefore } from 'date-fns'
 import { useGetBookings, useCreateBooking, useGetResources, BookingError } from '../api/bookings'
 
 const START_HOUR = 9
@@ -29,7 +29,7 @@ const TimelineView: React.FC<{ resource: string }> = ({ resource }) => {
     const startTimeStr = newStart.length === 5 ? `${newStart}:00` : newStart
     const endTimeStr = newEnd.length === 5 ? `${newEnd}:00` : newEnd
     createBooking.mutate(
-      { resource_name: resource, date, start_time: startTimeStr, end_time: endTimeStr },
+      { resource_name: resource, start_date: date, end_date: date, start_time: startTimeStr, end_time: endTimeStr },
       {
         onSuccess: () => {
           setNewStart("09:00")
@@ -86,6 +86,9 @@ const TimelineView: React.FC<{ resource: string }> = ({ resource }) => {
           <div style={{ position: 'absolute', top: 0, left: 70, right: 0, bottom: 0 }}>
             {bookings.map((b, idx) => {
               if (b.status !== 'confirmed') return null
+              // Show only if it falls on this day
+              if (b.start_date > date || b.end_date < date) return null
+              
               const style = getStyleForTimeRange(b.start_time, b.end_time)
               return (
                 <div key={b.id} style={{ position: 'absolute', left: 'var(--space-4)', right: 'var(--space-4)', top: style.top, height: style.height, backgroundColor: 'rgba(108, 99, 255, 0.95)', backdropFilter: 'blur(10px)', color: 'white', borderRadius: '16px', padding: 'var(--space-3) var(--space-5)', display: 'flex', flexDirection: 'column', justifyContent: 'center', boxShadow: '0 8px 24px rgba(108, 99, 255, 0.25)', zIndex: 10, transform: mounted ? 'scale(1)' : 'scale(0.95)', opacity: mounted ? 1 : 0, transition: `all 0.5s cubic-bezier(0.16, 1, 0.3, 1) ${idx * 0.1}s`, border: '1px solid rgba(255,255,255,0.2)' }}>
@@ -133,9 +136,11 @@ const TimelineView: React.FC<{ resource: string }> = ({ resource }) => {
 // ─────────────────────────────────────────────────────────────────────────────
 const CalendarView: React.FC<{ resource: string }> = ({ resource }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date())
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   
-  // Fetch ALL bookings for this resource (no date filter)
+  // Range selection state
+  const [rangeStart, setRangeStart] = useState<Date | null>(null)
+  const [rangeEnd, setRangeEnd] = useState<Date | null>(null)
+  
   const { data: allBookings = [] } = useGetBookings(resource)
   const createBooking = useCreateBooking()
 
@@ -149,28 +154,51 @@ const CalendarView: React.FC<{ resource: string }> = ({ resource }) => {
   const endDate = endOfWeek(monthEnd)
   const calendarDays = eachDayOfInterval({ start: startDate, end: endDate })
 
+  const handleDayClick = (day: Date) => {
+    if (!rangeStart) {
+      setRangeStart(day)
+      setRangeEnd(day)
+    } else if (rangeStart && rangeEnd && isSameDay(rangeStart, rangeEnd)) {
+      if (isBefore(day, rangeStart)) {
+        setRangeStart(day)
+      } else {
+        setRangeEnd(day)
+      }
+    } else {
+      setRangeStart(day)
+      setRangeEnd(day)
+    }
+  }
+
   const handleBook = () => {
-    if (!selectedDate) return
+    if (!rangeStart || !rangeEnd) return
     setConflictMsg(null)
-    const dateStr = format(selectedDate, 'yyyy-MM-dd')
+    const startDateStr = format(rangeStart, 'yyyy-MM-dd')
+    const endDateStr = format(rangeEnd, 'yyyy-MM-dd')
     const startTimeStr = newStart.length === 5 ? `${newStart}:00` : newStart
     const endTimeStr = newEnd.length === 5 ? `${newEnd}:00` : newEnd
 
     createBooking.mutate(
-      { resource_name: resource, date: dateStr, start_time: startTimeStr, end_time: endTimeStr },
+      { resource_name: resource, start_date: startDateStr, end_date: endDateStr, start_time: startTimeStr, end_time: endTimeStr },
       {
         onSuccess: () => {
-          setSelectedDate(null) // Close panel or just clear
+          setRangeStart(null)
+          setRangeEnd(null)
         },
         onError: (err: BookingError) => {
           if (err.message === 'conflict' && err.conflicting_booking) {
-            setConflictMsg(`Conflict: slot is unavailable on ${dateStr}`)
+            setConflictMsg(`Conflict: slot is unavailable due to an overlapping booking.`)
           } else {
             alert(err.message || 'An error occurred')
           }
         }
       }
     )
+  }
+
+  const isDayInRange = (day: Date) => {
+    if (!rangeStart || !rangeEnd) return false
+    return isWithinInterval(day, { start: rangeStart, end: rangeEnd })
   }
 
   return (
@@ -203,16 +231,16 @@ const CalendarView: React.FC<{ resource: string }> = ({ resource }) => {
           
           {calendarDays.map(day => {
             const dateStr = format(day, 'yyyy-MM-dd')
-            const dayBookings = allBookings.filter(b => b.date === dateStr && b.status === 'confirmed')
-            const isSelected = selectedDate && isSameDay(day, selectedDate)
+            const dayBookings = allBookings.filter(b => b.start_date <= dateStr && b.end_date >= dateStr && b.status === 'confirmed')
+            const inRange = isDayInRange(day)
             const isCurrentMonth = isSameMonth(day, currentMonth)
 
             return (
               <div 
                 key={day.toISOString()}
-                onClick={() => isCurrentMonth && setSelectedDate(day)}
+                onClick={() => isCurrentMonth && handleDayClick(day)}
                 style={{
-                  backgroundColor: isSelected ? 'var(--color-primary-light)' : 'var(--color-surface)',
+                  backgroundColor: inRange ? 'var(--color-primary-light)' : 'var(--color-surface)',
                   padding: 'var(--space-2)',
                   minHeight: 100,
                   cursor: isCurrentMonth ? 'pointer' : 'default',
@@ -222,19 +250,19 @@ const CalendarView: React.FC<{ resource: string }> = ({ resource }) => {
                   flexDirection: 'column'
                 }}
               >
-                <div style={{ textAlign: 'right', fontWeight: 600, fontSize: 'var(--text-sm)', color: isToday(day) ? 'var(--color-primary)' : 'inherit', marginBottom: 'var(--space-2)' }}>
+                <div style={{ textAlign: 'right', fontWeight: 600, fontSize: 'var(--text-sm)', color: isToday(day) && !inRange ? 'var(--color-primary)' : 'inherit', marginBottom: 'var(--space-2)' }}>
                   {format(day, 'd')}
                 </div>
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
-                  {dayBookings.slice(0, 2).map(b => (
+                  {dayBookings.slice(0, 3).map(b => (
                     <div key={b.id} style={{ fontSize: 10, backgroundColor: 'rgba(108, 99, 255, 0.1)', color: 'var(--color-primary)', padding: '4px 6px', borderRadius: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 600 }}>
                       {b.start_time.substring(0, 5)} {b.employee_name.split(' ')[0]}
                     </div>
                   ))}
-                  {dayBookings.length > 2 && (
+                  {dayBookings.length > 3 && (
                     <div style={{ fontSize: 10, color: 'var(--color-neutral-dark)', textAlign: 'center', marginTop: 'auto' }}>
-                      +{dayBookings.length - 2} more
+                      +{dayBookings.length - 3} more
                     </div>
                   )}
                 </div>
@@ -244,36 +272,17 @@ const CalendarView: React.FC<{ resource: string }> = ({ resource }) => {
         </div>
       </div>
 
-      {/* Right panel for booking on a specific day */}
-      {selectedDate && (
+      {/* Right panel for booking a date range */}
+      {rangeStart && rangeEnd && (
         <div style={{ width: 320, flexShrink: 0, backgroundColor: 'var(--color-surface)', borderRadius: '24px', padding: 'var(--space-8)', border: '1px solid var(--color-border)', boxShadow: '0 20px 40px rgba(0,0,0,0.04)', position: 'sticky', top: 'var(--space-8)', animation: 'fadeInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-6)' }}>
             <h3 style={{ fontSize: 'var(--text-lg)', fontFamily: 'var(--font-display)', fontWeight: 600, margin: 0, letterSpacing: '-0.01em' }}>
-              {format(selectedDate, 'MMM d')}
+              {isSameDay(rangeStart, rangeEnd) ? format(rangeStart, 'MMM d, yyyy') : `${format(rangeStart, 'MMM d')} - ${format(rangeEnd, 'MMM d')}`}
             </h3>
-            <button onClick={() => setSelectedDate(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 20, color: 'var(--color-neutral-dark)' }}>&times;</button>
-          </div>
-
-          {/* List existing bookings on this day */}
-          <div style={{ marginBottom: 'var(--space-6)' }}>
-            <h4 style={{ fontSize: 'var(--text-xs)', textTransform: 'uppercase', color: 'var(--color-neutral)', marginBottom: 'var(--space-3)' }}>Scheduled</h4>
-            {allBookings.filter(b => b.date === format(selectedDate, 'yyyy-MM-dd') && b.status === 'confirmed').length === 0 ? (
-              <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-neutral-dark)' }}>No bookings for this day.</p>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-                {allBookings.filter(b => b.date === format(selectedDate, 'yyyy-MM-dd') && b.status === 'confirmed').map(b => (
-                  <div key={b.id} style={{ padding: 'var(--space-3)', backgroundColor: 'var(--color-canvas)', borderRadius: 8, border: '1px solid var(--color-border)', fontSize: 'var(--text-sm)' }}>
-                    <div style={{ fontWeight: 600 }}>{b.employee_name}</div>
-                    <div style={{ color: 'var(--color-neutral-dark)', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', marginTop: 2 }}>
-                      {b.start_time.substring(0, 5)} - {b.end_time.substring(0, 5)}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <button onClick={() => { setRangeStart(null); setRangeEnd(null) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 20, color: 'var(--color-neutral-dark)' }}>&times;</button>
           </div>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)', borderTop: '1px dashed var(--color-border)', paddingTop: 'var(--space-6)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
             <div>
               <label style={{ display: 'block', fontSize: 'var(--text-xs)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-neutral)', marginBottom: 'var(--space-2)' }}>Start Time</label>
               <input type="time" value={newStart} onChange={e => setNewStart(e.target.value)} style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-canvas)', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-sm)', fontWeight: 600, outline: 'none' }} />
@@ -290,7 +299,7 @@ const CalendarView: React.FC<{ resource: string }> = ({ resource }) => {
             )}
 
             <button onClick={handleBook} disabled={createBooking.isPending} style={{ marginTop: 'var(--space-2)', backgroundColor: 'var(--color-primary)', color: 'white', border: 'none', padding: '16px', borderRadius: 'var(--radius-full)', fontWeight: 600, fontSize: 'var(--text-md)', cursor: 'pointer', fontFamily: 'var(--font-body)', boxShadow: '0 8px 20px rgba(108, 99, 255, 0.3)', opacity: createBooking.isPending ? 0.8 : 1 }}>
-              {createBooking.isPending ? 'Booking...' : 'Book'}
+              {createBooking.isPending ? 'Booking...' : 'Book Range'}
             </button>
           </div>
         </div>
@@ -317,7 +326,6 @@ const BookingsPage: React.FC = () => {
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: 'var(--space-10)' }}>
-      {/* Header */}
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 'var(--space-12)' }}>
         <div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, letterSpacing: '-0.03em', margin: '0 0 var(--space-2)' }}>
@@ -341,14 +349,12 @@ const BookingsPage: React.FC = () => {
         </div>
       </header>
 
-      {/* Dynamic View Injection */}
       {selectedResourceName && (
         isRoom 
           ? <TimelineView key={`timeline-${selectedResourceName}`} resource={selectedResourceName} />
           : <CalendarView key={`calendar-${selectedResourceName}`} resource={selectedResourceName} />
       )}
 
-      {/* Global styles for animations */}
       <style>{`
         @keyframes fadeInUp {
           from { opacity: 0; transform: translateY(20px); }

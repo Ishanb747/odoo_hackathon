@@ -5,7 +5,8 @@ const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 export interface BookingResponse {
   id: number
   resource_name: string
-  date: string
+  start_date: string
+  end_date: string
   start_time: string
   end_time: string
   status: 'confirmed' | 'cancelled' | 'conflict'
@@ -16,7 +17,8 @@ export interface BookingResponse {
 
 export interface BookingCreate {
   resource_name: string
-  date: string
+  start_date: string
+  end_date: string
   start_time: string
   end_time: string
 }
@@ -42,8 +44,13 @@ const getHeaders = () => {
   }
 }
 
+export interface ResourceItem {
+  name: string
+  category: string
+}
+
 export const useGetResources = () => {
-  return useQuery<string[]>({
+  return useQuery<ResourceItem[]>({
     queryKey: ['bookable_resources'],
     queryFn: async () => {
       const url = new URL(`${API_BASE}/bookings/resources`)
@@ -56,15 +63,17 @@ export const useGetResources = () => {
   })
 }
 
-export const useGetBookings = (resource_name: string, date: string) => {
+export const useGetBookings = (resource_name: string, date?: string) => {
   return useQuery<BookingResponse[]>({
     queryKey: ['bookings', resource_name, date],
     queryFn: async () => {
-      if (!resource_name || !date) return []
+      if (!resource_name) return []
       
       const url = new URL(`${API_BASE}/bookings`)
       url.searchParams.append('resource_name', resource_name)
-      url.searchParams.append('booking_date', date)
+      if (date) {
+        url.searchParams.append('booking_date', date)
+      }
       
       const res = await fetch(url.toString(), {
         headers: getHeaders(),
@@ -75,7 +84,7 @@ export const useGetBookings = (resource_name: string, date: string) => {
       }
       return res.json()
     },
-    enabled: !!resource_name && !!date,
+    enabled: !!resource_name,
   })
 }
 
@@ -100,7 +109,7 @@ export const useCreateBooking = () => {
       return res.json()
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['bookings', variables.resource_name, variables.date] })
+      queryClient.invalidateQueries({ queryKey: ['bookings', variables.resource_name] })
     },
   })
 }
