@@ -22,7 +22,8 @@ class Booking(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     resource_name: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
     employee_id: Mapped[int] = mapped_column(ForeignKey("employees.id"), nullable=False)
-    date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    start_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    end_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     start_time: Mapped[time] = mapped_column(Time, nullable=False)
     end_time: Mapped[time] = mapped_column(Time, nullable=False)
     status: Mapped[BookingStatus] = mapped_column(
