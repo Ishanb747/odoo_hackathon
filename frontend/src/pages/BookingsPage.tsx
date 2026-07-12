@@ -182,7 +182,7 @@ const BookingsPage: React.FC = () => {
             marginBottom: 'var(--space-8)', 
             paddingBottom: 'var(--space-6)',
             borderBottom: '1px solid var(--color-border)',
-            margin: 0,
+            margin: '0 0 var(--space-8) 0',
             letterSpacing: '-0.01em',
             display: 'flex',
             alignItems: 'center',
