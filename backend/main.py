@@ -12,6 +12,7 @@ from routers.auth import router as auth_router
 from routers.org import router as org_router
 from routers.assets import router as assets_router
 from routers.allocations import router as allocations_router
+from routers.bookings import router as bookings_router
 
 app = FastAPI(
     title="AssetFlow API",
@@ -65,7 +66,7 @@ app.include_router(org_router,  prefix="/org",  tags=["org"])
 
 # ── Future routers — append one line per phase ────────────────
 app.include_router(assets_router, prefix="/assets", tags=["assets"])
-app.include_router(allocations_router, prefix="/allocations", tags=["allocations"])
+# Phase 3 (Dev):   app.include_router(allocations_router, prefix="/allocations", tags=["allocations"])
 # Phase 4 (Ishan): app.include_router(bookings_router, prefix="/bookings", tags=["bookings"])
 # Phase 5 (Ishan): app.include_router(maintenance_router, prefix="/maintenance", tags=["maintenance"])
 # Phase 6 (Ishan): app.include_router(audits_router, prefix="/audits", tags=["audits"])
